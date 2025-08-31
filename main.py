@@ -1,5 +1,5 @@
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, BotCommand
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, BotCommand, ReplyKeyboardMarkup
 import os
 from datetime import datetime, timedelta
 
@@ -23,26 +23,50 @@ async def dashboard(update, context):
         "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
         "🗂️ *Yearly*: Ergebnisse des Jahres"
     )
+    # Entferne Custom Keyboard, um Standard-Tastatur bei /dashboard zu zeigen
     await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
 
 async def info(update, context):
+    # Definiere Custom Keyboard
+    keyboard = [
+        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["🗂️ Ergebnisse (Aktuelles Jahr)"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     await update.message.reply_text(
         "ℹ️ *Info*\n"
         "Dies ist ein Platzhaltertext für den Bot. Er beschreibt, worum es geht. "
         "#PLATZHALTER_INFO_TEXT",  # Platzhalter für späteren Info-Text
-        parse_mode="Markdown"
+        parse_mode="Markdown",
+        reply_markup=reply_markup
     )
 
 async def result(update, context):
+    # Definiere Custom Keyboard
+    keyboard = [
+        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["🗂️ Ergebnisse (Aktuelles Jahr)"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     result_percent = "1.04"  # PLATZHALTER_RESULT_PERCENT: Ersetze mit echtem Wert
     today = datetime.now().strftime("%Y-%m-%d")  # Aktuelles Datum
     await update.message.reply_text(
         f"📈 *Das Ergebnis von heute {today}*\n"
         f"{result_percent}%",
-        parse_mode="Markdown"
+        parse_mode="Markdown",
+        reply_markup=reply_markup
     )
 
 async def daily(update, context):
+    # Definiere Custom Keyboard
+    keyboard = [
+        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["🗂️ Ergebnisse (Aktuelles Jahr)"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     # Simuliere Ergebnisse für die aktuelle Woche (Platzhalter)
     today = datetime.now()
     week_start = today - timedelta(days=today.weekday())
@@ -54,9 +78,16 @@ async def daily(update, context):
     message = "📅 *Ergebnisse der aktuellen Woche*\n\n"
     for date, result in results.items():
         message += f"{date}: {result}%\n"
-    await update.message.reply_text(message, parse_mode="Markdown")
+    await update.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
 
 async def weekly(update, context):
+    # Definiere Custom Keyboard
+    keyboard = [
+        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["🗂️ Ergebnisse (Aktuelles Jahr)"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     # Simuliere Ergebnisse für 52 Wochen (Platzhalter)
     results = {  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
         f"Woche {i+1}": f"{1.00 + i * 0.05:.2f}" for i in range(52)
@@ -65,9 +96,16 @@ async def weekly(update, context):
     message = "🗓️ *Ergebnisse aller Wochen 2025*\n\n"
     for week, result in results.items():
         message += f"{week}: {result}%\n"
-    await update.message.reply_text(message, parse_mode="Markdown")
+    await update.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
 
 async def yearly(update, context):
+    # Definiere Custom Keyboard
+    keyboard = [
+        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["🗂️ Ergebnisse (Aktuelles Jahr)"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     # Simuliere Ergebnisse für das aktuelle Jahr (Platzhalter)
     results = [  # PLATZHALTER_YEARLY_RESULTS: Ersetze mit echten Daten
         ("2025", "1.50")
@@ -76,17 +114,25 @@ async def yearly(update, context):
     message = "🗂️ *Ergebnisse des Jahres*\n\n"
     for year, result in results:
         message += f"{year}: {result}%"
-    await update.message.reply_text(message, parse_mode="Markdown")
+    await update.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
 
 async def button_callback(update, context):
     query = update.callback_query
     await query.answer(text=f"Du hast {query.data.replace('cmd_', '')} gewählt!")  # Bestätigungsmeldung
+    # Definiere Custom Keyboard für Inline-Button-Antworten
+    keyboard = [
+        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["🗂️ Ergebnisse (Aktuelles Jahr)"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     if query.data == "cmd_info":
         await query.message.reply_text(
             "ℹ️ *Info*\n"
             "Dies ist ein Platzhaltertext für den Bot. Er beschreibt, worum es geht. "
             "#PLATZHALTER_INFO_TEXT",  # Platzhalter für späteren Info-Text
-            parse_mode="Markdown"
+            parse_mode="Markdown",
+            reply_markup=reply_markup
         )
     elif query.data == "cmd_result":
         result_percent = "1.04"  # PLATZHALTER_RESULT_PERCENT: Ersetze mit echtem Wert
@@ -94,7 +140,8 @@ async def button_callback(update, context):
         await query.message.reply_text(
             f"📈 *Das Ergebnis von heute {today}*\n"
             f"{result_percent}%",
-            parse_mode="Markdown"
+            parse_mode="Markdown",
+            reply_markup=reply_markup
         )
     elif query.data == "cmd_daily":
         today = datetime.now()
@@ -106,7 +153,7 @@ async def button_callback(update, context):
         message = "📅 *Ergebnisse der aktuellen Woche*\n\n"
         for date, result in results.items():
             message += f"{date}: {result}%\n"
-        await query.message.reply_text(message, parse_mode="Markdown")
+        await query.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
     elif query.data == "cmd_weekly":
         results = {  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
             f"Woche {i+1}": f"{1.00 + i * 0.05:.2f}" for i in range(52)
@@ -114,7 +161,7 @@ async def button_callback(update, context):
         message = "🗓️ *Ergebnisse aller Wochen 2025*\n\n"
         for week, result in results.items():
             message += f"{week}: {result}%\n"
-        await query.message.reply_text(message, parse_mode="Markdown")
+        await query.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
     elif query.data == "cmd_yearly":
         results = [  # PLATZHALTER_YEARLY_RESULTS: Ersetze mit echten Daten
             ("2025", "1.50")
@@ -122,7 +169,7 @@ async def button_callback(update, context):
         message = "🗂️ *Ergebnisse des Jahres*\n\n"
         for year, result in results:
             message += f"{year}: {result}%"
-        await query.message.reply_text(message, parse_mode="Markdown")
+        await query.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
 
 def main():
     # Erstelle die Application
@@ -140,11 +187,11 @@ def main():
     # Setze Bot-Menü direkt
     async def set_commands():
         commands = [
-            BotCommand("info", "ℹ️ Zeigt Infos zum Bot"),
-            BotCommand("result", "📈 Zeigt das heutige Ergebnis"),
-            BotCommand("daily", "📅 Ergebnisse dieser Woche"),
-            BotCommand("weekly", "🗓️ Ergebnisse aller Wochen"),
-            BotCommand("yearly", "🗂️ Ergebnisse des Jahres"),
+            BotCommand("info", "Informationen"),
+            BotCommand("result", "Heutiges Ergebnis"),
+            BotCommand("daily", "Ergebnisse (Aktuelle Woche)"),
+            BotCommand("weekly", "Ergebnisse (Aktueller Monat)"),
+            BotCommand("yearly", "Ergebnisse (Aktuelles Jahr)"),
         ]
         await app.bot.set_my_commands(commands)
 
