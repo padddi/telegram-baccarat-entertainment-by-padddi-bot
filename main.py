@@ -1,4 +1,5 @@
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, Filters
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler
+from telegram.ext.filters import Filters  # Korrigierter Import für Filters
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 import os
 from datetime import datetime, timedelta
