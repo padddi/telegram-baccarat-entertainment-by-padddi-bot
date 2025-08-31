@@ -1,4 +1,4 @@
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 import os
 from datetime import datetime, timedelta
@@ -116,6 +116,32 @@ async def yearly(update, context):
         message += f"{year}: {result}%"
     await update.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
 
+async def handle_keyboard_buttons(update, context):
+    # Abfangen der Custom Keyboard Button-Interaktionen
+    text = update.message.text
+    # Definiere Custom Keyboard
+    keyboard = [
+        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["🗂️ Ergebnisse (Aktuelles Jahr)"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    if text == "ℹ️ Informationen":
+        await info(update, context)
+    elif text == "📈 Heutiges Ergebnis":
+        await result(update, context)
+    elif text == "📅 Ergebnisse (Aktuelle Woche)":
+        await daily(update, context)
+    elif text == "🗓️ Ergebnisse (Aktueller Monat)":
+        await weekly(update, context)
+    elif text == "🗂️ Ergebnisse (Aktuelles Jahr)":
+        await yearly(update, context)
+    else:
+        await update.message.reply_text(
+            "Bitte wähle einen Befehl aus der Tastatur.",
+            reply_markup=reply_markup
+        )
+
 async def button_callback(update, context):
     query = update.callback_query
     await query.answer(text=f"Du hast {query.data.replace('cmd_', '')} gewählt!")  # Bestätigungsmeldung
@@ -183,6 +209,8 @@ def main():
     app.add_handler(CommandHandler("weekly", weekly))
     app.add_handler(CommandHandler("yearly", yearly))
     app.add_handler(CallbackQueryHandler(button_callback))
+    # Füge MessageHandler für Custom Keyboard Buttons hinzu
+    app.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_keyboard_buttons))
 
     # Starte Webhook (kein set_my_commands, um linken Menü-Button zu entfernen)
     app.run_webhook(
