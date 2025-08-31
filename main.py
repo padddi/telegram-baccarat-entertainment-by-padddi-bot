@@ -121,7 +121,7 @@ async def result(update, context):
     try:
         latest = max(data, key=lambda x: datetime.strptime(x["Date"], "%Y-%m-%d"))
         display_date = datetime.strptime(latest["Date"], "%Y-%m-%d").strftime("%d.%m.%Y")
-        message = f"📈 *Letztes Ergebnis vom {display_date}*\n\n✅ {format_percent(latest['Result'])}%"
+        message = f"📈 *Letztes Ergebnis*\n\n{display_date}: ✅ {format_percent(latest['Result'])}%"
     except (ValueError, KeyError):
         message = "Fehler: Ungültiges Datenformat in Airtable."
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
@@ -177,11 +177,11 @@ async def weekly(update, context):
             for week in sorted(weekly_results.keys()):
                 total = sum(weekly_results[week]) if weekly_results[week] else 0
                 start_date, end_date = get_week_date_range(week, today.year)
-                message += f"KW {week} ({start_date} - {end_date}): {format_percent(total)}%\n"
+                message += f"*KW {week}*\n{start_date} - {end_date}: 📈 {format_percent(total)}%\n\n"
             # Monatsergebnis (Summe aller Ergebnisse im Monat)
             month_results = [r for w in weekly_results.values() for r in w]
             month_total = sum(month_results) if month_results else 0
-            message += f"\n📊 *Monatsergebnis*: {format_percent(month_total)}%\n\n\n"
+            message += f"📊 *Monatsergebnis*: {format_percent(month_total)}%\n\n\n"
         else:
             message += "Keine Ergebnisse für den aktuellen Monat.\n"
     else:
