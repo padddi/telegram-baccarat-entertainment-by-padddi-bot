@@ -1,5 +1,5 @@
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, BotCommand, ReplyKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 import os
 from datetime import datetime, timedelta
 
@@ -184,22 +184,7 @@ def main():
     app.add_handler(CommandHandler("yearly", yearly))
     app.add_handler(CallbackQueryHandler(button_callback))
 
-    # Setze Bot-Menü direkt
-    async def set_commands():
-        commands = [
-            BotCommand("info", "Informationen"),
-            BotCommand("result", "Heutiges Ergebnis"),
-            BotCommand("daily", "Ergebnisse (Aktuelle Woche)"),
-            BotCommand("weekly", "Ergebnisse (Aktueller Monat)"),
-            BotCommand("yearly", "Ergebnisse (Aktuelles Jahr)"),
-        ]
-        await app.bot.set_my_commands(commands)
-
-    # Führe set_commands aus
-    import asyncio
-    asyncio.get_event_loop().run_until_complete(set_commands())
-
-    # Starte Webhook
+    # Starte Webhook (kein set_my_commands, um linken Menü-Button zu entfernen)
     app.run_webhook(
         listen="0.0.0.0",
         port=int(os.getenv("PORT", 8443)),
