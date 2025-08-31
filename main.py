@@ -124,18 +124,6 @@ async def button_callback(update, context):
             message += f"{year}: {result}%"
         await query.message.reply_text(message, parse_mode="Markdown")
 
-async def set_bot_commands(application):
-    # Definiere Bot-Menü-Befehle
-    commands = [
-        BotCommand("info", "ℹ️ Zeigt Infos zum Bot"),
-        BotCommand("result", "📈 Zeigt das heutige Ergebnis"),
-        BotCommand("daily", "📅 Ergebnisse dieser Woche"),
-        BotCommand("weekly", "🗓️ Ergebnisse aller Wochen"),
-        BotCommand("yearly", "🗂️ Ergebnisse des Jahres"),
-    ]
-    # Setze das Menü
-    await application.bot.set_my_commands(commands)
-
 def main():
     # Erstelle die Application
     app = Application.builder().token(TOKEN).build()
@@ -149,8 +137,20 @@ def main():
     app.add_handler(CommandHandler("yearly", yearly))
     app.add_handler(CallbackQueryHandler(button_callback))
 
-    # Setze Bot-Menü beim Start
-    app.add_post_init_hook(set_bot_commands)
+    # Setze Bot-Menü direkt
+    async def set_commands():
+        commands = [
+            BotCommand("info", "ℹ️ Zeigt Infos zum Bot"),
+            BotCommand("result", "📈 Zeigt das heutige Ergebnis"),
+            BotCommand("daily", "📅 Ergebnisse dieser Woche"),
+            BotCommand("weekly", "🗓️ Ergebnisse aller Wochen"),
+            BotCommand("yearly", "🗂️ Ergebnisse des Jahres"),
+        ]
+        await app.bot.set_my_commands(commands)
+
+    # Führe set_commands aus
+    import asyncio
+    asyncio.get_event_loop().run_until_complete(set_commands())
 
     # Starte Webhook
     app.run_webhook(
