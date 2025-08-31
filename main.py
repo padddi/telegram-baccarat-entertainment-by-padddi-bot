@@ -56,10 +56,22 @@ async def fetch_airtable_data(context, year):
             )
             response.raise_for_status()  # Fehler bei nicht-200 Status
             data = response.json()
-            records.extend([
-                {"Date": r["fields"]["Date"], "Result": r["fields"]["Result"]}
-                for r in data.get("records", []) if "Date" in r["fields"] and "Result" in r["fields"]
-            ])
+            for r in data.get("records", []):
+                if "Date" not in r["fields"] or "Result" not in r["fields"]:
+                    continue
+                # Versuche ISO-Format, dann DD.MM.YYYY als Fallback
+                date_str = r["fields"]["Date"]
+                try:
+                    datetime.strptime(date_str, "%Y-%m-%d")
+                    records.append({"Date": date_str, "Result": r["fields"]["Result"]})
+                except ValueError:
+                    try:
+                        datetime.strptime(date_str, "%d.%m.%Y")
+                        # Konvertiere DD.MM.YYYY zu YYYY-MM-DD für Konsistenz
+                        date_obj = datetime.strptime(date_str, "%d.%m.%Y")
+                        records.append({"Date": date_obj.strftime("%Y-%m-%d"), "Result": r["fields"]["Result"]})
+                    except ValueError:
+                        continue  # Ignoriere ungültige Daten
             if "offset" not in data:
                 break
             params["offset"] = data["offset"]
@@ -92,8 +104,13 @@ async def result(update, context):
     if not data:
         await update.message.reply_text("Keine Daten verfügbar.", reply_markup=KEYBOARD)
         return
-    latest = max(data, key=lambda x: datetime.strptime(x["Date"], "%d.%m.%Y"))
-    message = f"📈 *Letztes Ergebnis vom {latest['Date']}*\n\n✅ {latest['Result']}%"
+    try:
+        latest = max(data, key=lambda x: datetime.strptime(x["Date"], "%Y-%m-%d"))
+        # Konvertiere Datum zurück in DD.MM.YYYY für die Anzeige
+        display_date = datetime.strptime(latest["Date"], "%Y-%m-%d").strftime("%d.%m.%Y")
+        message = f"📈 *Letztes Ergebnis vom {display_date}*\n\n✅ {latest['Result']}%"
+    except (ValueError, KeyError):
+        message = "Fehler: Ungültiges Datenformat in Airtable."
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
 async def daily(update, context):
@@ -103,14 +120,15 @@ async def daily(update, context):
     week_end = week_start + timedelta(days=4)  # Freitag
     week_data = [
         r for r in data
-        if week_start.date() <= datetime.strptime(r["Date"], "%d.%m.%Y").date() <= week_end.date()
+        if week_start.date() <= datetime.strptime(r["Date"], "%Y-%m-%d").date() <= week_end.date()
     ]
     message = "📅 *Ergebnisse der aktuellen Woche*\n\n"
     if week_data:
-        for r in sorted(week_data, key=lambda x: datetime.strptime(x["Date"], "%d.%m.%Y")):
-            date_obj = datetime.strptime(r["Date"], "%d.%m.%Y")
+        for r in sorted(week_data, key=lambda x: datetime.strptime(x["Date"], "%Y-%m-%d")):
+            date_obj = datetime.strptime(r["Date"], "%Y-%m-%d")
             weekday = WEEKDAYS[date_obj.weekday()]
-            message += f"{r['Date']}, {weekday}: {r['Result']}%\n"
+            display_date = date_obj.strftime("%d.%m.%Y")
+            message += f"{display_date}, {weekday}: {r['Result']}%\n"
     else:
         message += "Keine Ergebnisse für die aktuelle Woche.\n"
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
@@ -123,11 +141,14 @@ async def weekly(update, context):
     if data:
         weekly_results = {}
         for r in data:
-            date_obj = datetime.strptime(r["Date"], "%d.%m.%Y")
-            year_week = (date_obj.year, date_obj.isocalendar().week)
-            if year_week not in weekly_results:
-                weekly_results[year_week] = []
-            weekly_results[year_week].append(r["Result"])
+            try:
+                date_obj = datetime.strptime(r["Date"], "%Y-%m-%d")
+                year_week = (date_obj.year, date_obj.isocalendar().week)
+                if year_week not in weekly_results:
+                    weekly_results[year_week] = []
+                weekly_results[year_week].append(r["Result"])
+            except ValueError:
+                continue
         for (year, week), results in sorted(weekly_results.items()):
             if year == today.year and week > current_week:
                 continue
@@ -143,10 +164,13 @@ async def yearly(update, context):
     if data:
         yearly_results = {}
         for r in data:
-            year = datetime.strptime(r["Date"], "%d.%m.%Y").year
-            if year not in yearly_results:
-                yearly_results[year] = []
-            yearly_results[year].append(r["Result"])
+            try:
+                year = datetime.strptime(r["Date"], "%Y-%m-%d").year
+                if year not in yearly_results:
+                    yearly_results[year] = []
+                yearly_results[year].append(r["Result"])
+            except ValueError:
+                continue
         for year in sorted(yearly_results.keys()):
             avg = sum(yearly_results[year]) / len(yearly_results[year]) if yearly_results[year] else 0
             message += f"{year}: {avg:.2f}%"
