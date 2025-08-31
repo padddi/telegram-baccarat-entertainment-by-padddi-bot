@@ -43,9 +43,11 @@ async def info(update, context):
     )
 
 async def result(update, context):
-    result_percent = "1.00"  # PLATZHALTER_RESULT_PERCENT: Ersetze mit echtem Wert
+    result_percent = "1.04"  # PLATZHALTER_RESULT_PERCENT: Ersetze mit echtem Wert
+    today = datetime.now().strftime("%Y-%m-%d")  # Aktuelles Datum
     await update.message.reply_text(
-        f"📈 *Das heutige Ergebnis beträgt* {result_percent} %",
+        f"📈 *Das Ergebnis von heute {today}*\n"
+        f"{result_percent}%",
         parse_mode="Markdown"
     )
 
@@ -57,11 +59,10 @@ async def daily(update, context):
         (week_start + timedelta(days=i)).strftime("%Y-%m-%d"): f"{1.00 + i * 0.1:.2f}"
         for i in range(7)
     }
-    # Konsolen-Format mit Markdown
-    message = "📅 *Ergebnisse der aktuellen Woche*\n```\n"
+    # Normales Markdown-Format ohne Code-Block
+    message = "📅 *Ergebnisse der aktuellen Woche*\n\n"
     for date, result in results.items():
-        message += f"{date}: {result} %\n"
-    message += "```"
+        message += f"{date}: {result}%\n"
     await update.message.reply_text(message, parse_mode="Markdown")
 
 async def weekly(update, context):
@@ -69,11 +70,10 @@ async def weekly(update, context):
     results = {  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
         f"Woche {i+1}": f"{1.00 + i * 0.05:.2f}" for i in range(52)
     }
-    # Konsolen-Format mit Markdown
-    message = "🗓️ *Ergebnisse aller Wochen 2025*\n```\n"
+    # Normales Markdown-Format ohne Code-Block
+    message = "🗓️ *Ergebnisse aller Wochen 2025*\n\n"
     for week, result in results.items():
-        message += f"{week}: {result} %\n"
-    message += "```"
+        message += f"{week}: {result}%\n"
     await update.message.reply_text(message, parse_mode="Markdown")
 
 async def yearly(update, context):
@@ -81,11 +81,10 @@ async def yearly(update, context):
     results = [  # PLATZHALTER_YEARLY_RESULTS: Ersetze mit echten Daten
         ("2025", "1.50")
     ]
-    # Konsolen-Format mit Markdown
-    message = "🗂️ *Ergebnisse des Jahres*\n```\n"
+    # Normales Markdown-Format ohne Code-Block
+    message = "🗂️ *Ergebnisse des Jahres*\n\n"
     for year, result in results:
-        message += f"{year}: {result} %\n"
-    message += "```"
+        message += f"{year}: {result}%"
     await update.message.reply_text(message, parse_mode="Markdown")
 
 async def button_callback(update, context):
@@ -99,9 +98,11 @@ async def button_callback(update, context):
             parse_mode="Markdown"
         )
     elif query.data == "cmd_result":
-        result_percent = "1.00"  # PLATZHALTER_RESULT_PERCENT: Ersetze mit echtem Wert
+        result_percent = "1.04"  # PLATZHALTER_RESULT_PERCENT: Ersetze mit echtem Wert
+        today = datetime.now().strftime("%Y-%m-%d")  # Aktuelles Datum
         await query.message.reply_text(
-            f"📈 *Das heutige Ergebnis beträgt* {result_percent} %",
+            f"📈 *Das Ergebnis von heute {today}*\n"
+            f"{result_percent}%",
             parse_mode="Markdown"
         )
     elif query.data == "cmd_daily":
@@ -111,29 +112,26 @@ async def button_callback(update, context):
             (week_start + timedelta(days=i)).strftime("%Y-%m-%d"): f"{1.00 + i * 0.1:.2f}"
             for i in range(7)
         }
-        message = "📅 *Ergebnisse der aktuellen Woche*\n```\n"
+        message = "📅 *Ergebnisse der aktuellen Woche*\n\n"
         for date, result in results.items():
-            message += f"{date}: {result} %\n"
-        message += "```"
-        await query.message.reply_text(message, parse_mode="Markdown")
+            message += f"{date}: {result}%\n"
+        await update.message.reply_text(message, parse_mode="Markdown")
     elif query.data == "cmd_weekly":
         results = {  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
             f"Woche {i+1}": f"{1.00 + i * 0.05:.2f}" for i in range(52)
         }
-        message = "🗓️ *Ergebnisse aller Wochen 2025*\n```\n"
+        message = "🗓️ *Ergebnisse aller Wochen 2025*\n\n"
         for week, result in results.items():
-            message += f"{week}: {result} %\n"
-        message += "```"
-        await query.message.reply_text(message, parse_mode="Markdown")
+            message += f"{week}: {result}%\n"
+        await update.message.reply_text(message, parse_mode="Markdown")
     elif query.data == "cmd_yearly":
         results = [  # PLATZHALTER_YEARLY_RESULTS: Ersetze mit echten Daten
             ("2025", "1.50")
         ]
-        message = "🗂️ *Ergebnisse des Jahres*\n```\n"
+        message = "🗂️ *Ergebnisse des Jahres*\n\n"
         for year, result in results:
-            message += f"{year}: {result} %\n"
-        message += "```"
-        await query.message.reply_text(message, parse_mode="Markdown")
+            message += f"{year}: {result}%"
+        await update.message.reply_text(message, parse_mode="Markdown")
 
 def main():
     # Erstelle die Application
