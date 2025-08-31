@@ -39,9 +39,9 @@ def format_percent(value):
     return f"{value:.2f}".replace(".", ",")
 
 def get_week_date_range(week, year):
-    """Gibt den Datumsbereich einer Woche (Montag bis Sonntag) zurück."""
+    """Gibt den Datumsbereich einer Woche (Montag bis Freitag) zurück."""
     first_day = datetime.strptime(f"{year}-W{week}-1", "%Y-W%W-%w")
-    last_day = first_day + timedelta(days=6)
+    last_day = first_day + timedelta(days=4)  # Freitag
     return first_day.strftime("%d.%m.%Y"), last_day.strftime("%d.%m.%Y")
 
 async def fetch_airtable_data(context, year):
