@@ -3,47 +3,49 @@ import requests
 from datetime import datetime, timedelta
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from config import DATE_FORMAT, PERCENT_FORMAT, EMOJIS  # Importiere aus config.py
 
 # Bot-Token aus Umgebungsvariablen
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 # Globale Konstanten
 KEYBOARD = ReplyKeyboardMarkup([
-    ["ℹ️ Info", "📈 Letztes Ergebnis"],
-    ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Wochen (Aktueller Monat)"],
-    ["🗓️ Ergebnisse (Monate)", "🗂️ Ergebnisse (Jahre)"]
+    ["ℹ️ Info", f"{EMOJIS['result']} Letztes Ergebnis"],
+    [f"{EMOJIS['month']} Ergebnisse (Aktuelle Woche)", f"{EMOJIS['month']} Wochen (Aktueller Monat)"],
+    [f"{EMOJIS['month']} Ergebnisse (Monate)", f"{EMOJIS['year']} Ergebnisse (Jahre)"]
 ], resize_keyboard=True)
 
 WEEKDAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"]
 
 DASHBOARD_MESSAGE = (
-    "*📊 Dein Bot-Dashboard 📊*\n\n"
-    "Willkommen im BE Bot Dashboard. Du hast folgende Möglichkeiten zur Auswahl:\n\n"
-    "ℹ️ *Info*: Zeigt Infos zum Bot\n"
-    "Befehl: /info\n\n"
-    "📈 *Result*: Zeigt das letzte Ergebnis\n"
-    "Befehl: /result\n\n"
-    "📅 *Daily*: Ergebnisse der aktuellen Woche\n"
-    "Befehl: /daily\n\n"
-    "🗓️ *Weekly*: Ergebnisse der Wochen des aktuellen Monats\n"
-    "Befehl: /weekly\n\n"
-    "🗓️ *Monthly*: Ergebnisse aller Monate des aktuellen Jahres\n"
-    "Befehl: /monthly\n\n"
-    "🗂️ *Yearly*: Ergebnisse aller Jahre\n"
-    "Befehl: /yearly\n\n"
-    "Bitte wähle einen Befehl aus dem unteren Menü."
+    f"*📊 Dein Bot-Dashboard 📊*\n\n"
+    f"Willkommen im BE Bot Dashboard. Emojis: {EMOJIS['sum']} = Summen, {EMOJIS['month']} = Zeitbereiche, {EMOJIS['result']} = Einzelresultate\n\n"
+    f"ℹ️ *Info*: Zeigt Infos zum Bot\n"
+    f"Befehl: /info\n\n"
+    f"{EMOJIS['result']} *Result*: Zeigt das letzte Ergebnis\n"
+    f"Befehl: /result\n\n"
+    f"{EMOJIS['month']} *Daily*: Ergebnisse der aktuellen Woche\n"
+    f"Befehl: /daily\n\n"
+    f"{EMOJIS['month']} *Weekly*: Ergebnisse der Wochen des aktuellen Monats\n"
+    f"Befehl: /weekly\n\n"
+    f"{EMOJIS['month']} *Monthly*: Ergebnisse aller Monate des aktuellen Jahres\n"
+    f"Befehl: /monthly\n\n"
+    f"{EMOJIS['year']} *Yearly*: Ergebnisse aller Jahre\n"
+    f"Befehl: /yearly\n\n"
+    f"{EMOJIS['refresh']} *Refresh*: Aktualisiert den Cache für aktuelle Daten (nur in Ausnahmefällen verwenden, z. B. bei aktualisierten Daten)\n"
+    f"Befehl: /refresh\n\n"
+    f"Bitte wähle einen Befehl aus dem unteren Menü."
 )
 
 def format_percent(value):
     """Formatiert einen Float-Wert als ###,##%."""
-    return f"{value:.2f}".replace(".", ",")
+    return f"{value:{PERCENT_FORMAT}}%"
 
 def get_week_date_range(week, year):
     """Gibt den Datumsbereich einer Woche (Montag bis Freitag) zurück."""
-    # ISO-Woche beginnt bei 0, daher week-1
     first_day = datetime.strptime(f"{year}-W{week-1}-1", "%Y-W%W-%w")
     last_day = first_day + timedelta(days=4)  # Freitag
-    return first_day.strftime("%d.%m.%Y"), last_day.strftime("%d.%m.%Y")
+    return first_day.strftime(DATE_FORMAT), last_day.strftime(DATE_FORMAT)
 
 async def fetch_airtable_data(context, year):
     """Holt Daten aus Airtable für ein gegebenes Jahr und speichert sie im Cache."""
@@ -78,8 +80,8 @@ async def fetch_airtable_data(context, year):
                     records.append({"Date": date_str, "Result": r["fields"]["Result"]})
                 except ValueError:
                     try:
-                        datetime.strptime(date_str, "%d.%m.%Y")
-                        date_obj = datetime.strptime(date_str, "%d.%m.%Y")
+                        datetime.strptime(date_str, DATE_FORMAT)
+                        date_obj = datetime.strptime(date_str, DATE_FORMAT)
                         records.append({"Date": date_obj.strftime("%Y-%m-%d"), "Result": r["fields"]["Result"]})
                     except ValueError:
                         continue
@@ -113,17 +115,36 @@ async def dashboard(update, context):
 async def info(update, context):
     await update.message.reply_text(DASHBOARD_MESSAGE, reply_markup=KEYBOARD, parse_mode="Markdown")
 
+async def refresh(update, context):
+    today = datetime.now()
+    year = str(today.year)
+    cache_key = f"airtable_cache_{year}"
+    timestamp_key = f"cache_timestamp_{year}"
+    if cache_key in context.bot_data:
+        del context.bot_data[cache_key]
+    if timestamp_key in context.bot_data:
+        del context.bot_data[timestamp_key]
+    await update.message.reply_text(
+        f"{EMOJIS['refresh']} Cache wurde aktualisiert. Bitte sende den gewünschten Befehl erneut.",
+        reply_markup=KEYBOARD,
+        parse_mode="Markdown"
+    )
+
 async def result(update, context):
     data = await get_current_year_data(context)
     if not data:
-        await update.message.reply_text("Keine Daten verfügbar.", reply_markup=KEYBOARD)
+        await update.message.reply_text(
+            f"Hoppla, die Daten konnten nicht geladen werden. Bitte versuche {EMOJIS['refresh']} /refresh oder später erneut.",
+            reply_markup=KEYBOARD,
+            parse_mode="Markdown"
+        )
         return
     try:
         latest = max(data, key=lambda x: datetime.strptime(x["Date"], "%Y-%m-%d"))
-        display_date = datetime.strptime(latest["Date"], "%Y-%m-%d").strftime("%d.%m.%Y")
-        message = f"📈 *Letztes Ergebnis*\n\n{display_date}: ✅ {format_percent(latest['Result'])}%"
+        display_date = datetime.strptime(latest["Date"], "%Y-%m-%d").strftime(DATE_FORMAT)
+        message = f"{EMOJIS['result']} *Letztes Ergebnis*\n\n{display_date}: {EMOJIS['result']} {format_percent(latest['Result'])}"
     except (ValueError, KeyError):
-        message = "Fehler: Ungültiges Datenformat in Airtable."
+        message = f"Hoppla, die Daten konnten nicht geladen werden. Bitte versuche {EMOJIS['refresh']} /refresh oder später erneut."
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
 async def daily(update, context):
@@ -136,18 +157,18 @@ async def daily(update, context):
         if week_start.date() <= datetime.strptime(r["Date"], "%Y-%m-%d").date() <= week_end.date()
     ]
     week_num = today.isocalendar().week
-    message = f"📅 *Ergebnisse der aktuellen Woche (KW {week_num} {today.year})*\n\n"
+    message = f"{EMOJIS['month']} *Ergebnisse der aktuellen Woche (KW {week_num} {today.year})*\n\n"
     if week_data:
         for r in sorted(week_data, key=lambda x: datetime.strptime(x["Date"], "%Y-%m-%d")):
             date_obj = datetime.strptime(r["Date"], "%Y-%m-%d")
             weekday = WEEKDAYS[date_obj.weekday()]
-            display_date = date_obj.strftime("%d.%m.%Y")
-            message += f"{display_date}, {weekday}: {format_percent(r['Result'])}%\n"
+            display_date = date_obj.strftime(DATE_FORMAT)
+            message += f"{display_date}, {weekday}: {format_percent(r['Result'])}\n"
         # Kumuliertes Ergebnis (Summe)
         total = sum(r["Result"] for r in week_data) if week_data else 0
-        message += f"\n📊 *Wochenergebnis*: {format_percent(total)}%"
+        message += f"\n{EMOJIS['sum']} *Wochenergebnis*: {format_percent(total)}"
     else:
-        message += "Keine Ergebnisse für die aktuelle Woche.\n"
+        message += f"Keine Ergebnisse für die aktuelle Woche.\n\n{EMOJIS['refresh']} Versuche /refresh, falls Daten fehlen."
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
 async def weekly(update, context):
@@ -159,7 +180,7 @@ async def weekly(update, context):
         "Juli", "August", "September", "Oktober", "November", "Dezember"
     ]
     month_name = month_names[current_month - 1]
-    message = f"🗓️ *Ergebnisse des aktuellen Monats ({month_name} {today.year})*\n\n"
+    message = f"{EMOJIS['month']} *Ergebnisse des aktuellen Monats ({month_name} {today.year})*\n\n"
     if data:
         weekly_results = {}
         for r in data:
@@ -177,21 +198,21 @@ async def weekly(update, context):
             for week in sorted(weekly_results.keys()):
                 total = sum(weekly_results[week]) if weekly_results[week] else 0
                 start_date, end_date = get_week_date_range(week, today.year)
-                message += f"*KW {week}*\n{start_date} - {end_date}: 📈 {format_percent(total)}%\n\n"
+                message += f"*KW {week}*\n{start_date} - {end_date}: {EMOJIS['week']} {format_percent(total)}\n\n"
             # Monatsergebnis (Summe aller Ergebnisse im Monat)
             month_results = [r for w in weekly_results.values() for r in w]
             month_total = sum(month_results) if month_results else 0
-            message += f"📊 *Monatsergebnis*: {format_percent(month_total)}%\n\n\n"
+            message += f"{EMOJIS['sum']} *Monatsergebnis*: {format_percent(month_total)}\n\n\n"
         else:
-            message += "Keine Ergebnisse für den aktuellen Monat.\n"
+            message += f"Keine Ergebnisse für den aktuellen Monat.\n\n{EMOJIS['refresh']} Versuche /refresh, falls Daten fehlen."
     else:
-        message += "Keine Daten verfügbar.\n"
+        message += f"Keine Daten verfügbar.\n\n{EMOJIS['refresh']} Versuche /refresh, falls Daten fehlen."
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
 async def monthly(update, context):
     data = await get_current_year_data(context)
     today = datetime.now()
-    message = f"🗓️ *Ergebnisse des aktuellen Jahres ({today.year})*\n\n"
+    message = f"{EMOJIS['month']} *Ergebnisse des aktuellen Jahres ({today.year})*\n\n"
     if data:
         monthly_results = {}
         month_names = [
@@ -214,18 +235,18 @@ async def monthly(update, context):
                 continue
             total = sum(monthly_results[month]) if monthly_results[month] else 0
             month_name = month_names[month - 1]
-            message += f"🗓️ {month_name} {today.year}: {format_percent(total)}%\n\n"
+            message += f"{EMOJIS['month']} {month_name} {today.year}: {format_percent(total)}\n\n"
         # Jahresergebnis (Summe aller Monate)
         year_results = [r for m in monthly_results.values() for r in m]
         year_total = sum(year_results) if year_results else 0
-        message += f"📊 *Jahresergebnis*: {format_percent(year_total)}%"
+        message += f"{EMOJIS['sum']} *Jahresergebnis*: {format_percent(year_total)}"
     else:
-        message += "Keine Daten verfügbar.\n"
+        message += f"Keine Daten verfügbar.\n\n{EMOJIS['refresh']} Versuche /refresh, falls Daten fehlen."
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
 async def yearly(update, context):
     data = await get_all_data(context)
-    message = "🗂️ *Ergebnisse aller Jahre*\n\n"
+    message = f"{EMOJIS['year']} *Ergebnisse aller Jahre*\n\n"
     if data:
         yearly_results = {}
         for r in data:
@@ -238,28 +259,28 @@ async def yearly(update, context):
                 continue
         for year in sorted(yearly_results.keys()):
             total = sum(yearly_results[year]) if yearly_results[year] else 0
-            message += f"🗂️ {year}: {format_percent(total)}%\n\n"
+            message += f"{EMOJIS['year']} {year}: {format_percent(total)}\n\n"
         # Gesamtergebnis (Summe aller Jahre)
         all_results = [r for y in yearly_results.values() for r in y]
         all_total = sum(all_results) if all_results else 0
-        message += f"📊 *Gesamtergebnis*: {format_percent(all_total)}%"
+        message += f"{EMOJIS['sum']} *Gesamtergebnis*: {format_percent(all_total)}"
     else:
-        message += "Keine Daten verfügbar.\n"
+        message += f"Keine Daten verfügbar.\n\n{EMOJIS['refresh']} Versuche /refresh, falls Daten fehlen."
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
 async def handle_keyboard_buttons(update, context):
     text = update.message.text
     if text == "ℹ️ Info":
         await info(update, context)
-    elif text == "📈 Letztes Ergebnis":
+    elif text == f"{EMOJIS['result']} Letztes Ergebnis":
         await result(update, context)
-    elif text == "📅 Ergebnisse (Aktuelle Woche)":
+    elif text == f"{EMOJIS['month']} Ergebnisse (Aktuelle Woche)":
         await daily(update, context)
-    elif text == "🗓️ Wochen (Aktueller Monat)":
+    elif text == f"{EMOJIS['month']} Wochen (Aktueller Monat)":
         await weekly(update, context)
-    elif text == "🗓️ Ergebnisse (Monate)":
+    elif text == f"{EMOJIS['month']} Ergebnisse (Monate)":
         await monthly(update, context)
-    elif text == "🗂️ Ergebnisse (Jahre)":
+    elif text == f"{EMOJIS['year']} Ergebnisse (Jahre)":
         await yearly(update, context)
     else:
         await update.message.reply_text(
@@ -277,6 +298,7 @@ def main():
     app.add_handler(CommandHandler("weekly", weekly))
     app.add_handler(CommandHandler("monthly", monthly))
     app.add_handler(CommandHandler("yearly", yearly))
+    app.add_handler(CommandHandler("refresh", refresh))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_keyboard_buttons))
     app.run_webhook(
         listen="0.0.0.0",
