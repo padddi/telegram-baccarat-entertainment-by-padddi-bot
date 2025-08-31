@@ -1,5 +1,5 @@
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, BotCommand
 import os
 from datetime import datetime, timedelta
 
@@ -7,22 +7,13 @@ from datetime import datetime, timedelta
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 async def dashboard(update, context):
-    # Definiere Buttons mit Emojis (ohne /dashboard)
+    # Definiere Inline-Buttons für /dashboard (im Chat)
     keyboard = [
-        [  # Erste Reihe
-            InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"),
-            InlineKeyboardButton("📈 Result", callback_data="cmd_result"),
-        ],
-        [  # Zweite Reihe
-            InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"),
-            InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly"),
-        ],
-        [  # Dritte Reihe
-            InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly"),
-        ]
+        [InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"), InlineKeyboardButton("📈 Result", callback_data="cmd_result")],
+        [InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"), InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly")],
+        [InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    # Formatiere die Nachricht mit Markdown
     message = (
         "*📊 Dein Bot-Dashboard 📊*\n"
         "Wähle einen Befehl aus:\n\n"
@@ -59,7 +50,7 @@ async def daily(update, context):
         (week_start + timedelta(days=i)).strftime("%Y-%m-%d"): f"{1.00 + i * 0.1:.2f}"
         for i in range(7)
     }
-    # Normales Markdown-Format ohne Code-Block
+    # Normales Markdown-Format
     message = "📅 *Ergebnisse der aktuellen Woche*\n\n"
     for date, result in results.items():
         message += f"{date}: {result}%\n"
@@ -70,7 +61,7 @@ async def weekly(update, context):
     results = {  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
         f"Woche {i+1}": f"{1.00 + i * 0.05:.2f}" for i in range(52)
     }
-    # Normales Markdown-Format ohne Code-Block
+    # Normales Markdown-Format
     message = "🗓️ *Ergebnisse aller Wochen 2025*\n\n"
     for week, result in results.items():
         message += f"{week}: {result}%\n"
@@ -81,7 +72,7 @@ async def yearly(update, context):
     results = [  # PLATZHALTER_YEARLY_RESULTS: Ersetze mit echten Daten
         ("2025", "1.50")
     ]
-    # Normales Markdown-Format ohne Code-Block
+    # Normales Markdown-Format
     message = "🗂️ *Ergebnisse des Jahres*\n\n"
     for year, result in results:
         message += f"{year}: {result}%"
@@ -115,7 +106,7 @@ async def button_callback(update, context):
         message = "📅 *Ergebnisse der aktuellen Woche*\n\n"
         for date, result in results.items():
             message += f"{date}: {result}%\n"
-        await update.message.reply_text(message, parse_mode="Markdown")
+        await query.message.reply_text(message, parse_mode="Markdown")
     elif query.data == "cmd_weekly":
         results = {  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
             f"Woche {i+1}": f"{1.00 + i * 0.05:.2f}" for i in range(52)
@@ -123,7 +114,7 @@ async def button_callback(update, context):
         message = "🗓️ *Ergebnisse aller Wochen 2025*\n\n"
         for week, result in results.items():
             message += f"{week}: {result}%\n"
-        await update.message.reply_text(message, parse_mode="Markdown")
+        await query.message.reply_text(message, parse_mode="Markdown")
     elif query.data == "cmd_yearly":
         results = [  # PLATZHALTER_YEARLY_RESULTS: Ersetze mit echten Daten
             ("2025", "1.50")
@@ -131,7 +122,19 @@ async def button_callback(update, context):
         message = "🗂️ *Ergebnisse des Jahres*\n\n"
         for year, result in results:
             message += f"{year}: {result}%"
-        await update.message.reply_text(message, parse_mode="Markdown")
+        await query.message.reply_text(message, parse_mode="Markdown")
+
+async def set_bot_commands(application):
+    # Definiere Bot-Menü-Befehle
+    commands = [
+        BotCommand("info", "ℹ️ Zeigt Infos zum Bot"),
+        BotCommand("result", "📈 Zeigt das heutige Ergebnis"),
+        BotCommand("daily", "📅 Ergebnisse dieser Woche"),
+        BotCommand("weekly", "🗓️ Ergebnisse aller Wochen"),
+        BotCommand("yearly", "🗂️ Ergebnisse des Jahres"),
+    ]
+    # Setze das Menü
+    await application.bot.set_my_commands(commands)
 
 def main():
     # Erstelle die Application
@@ -145,6 +148,9 @@ def main():
     app.add_handler(CommandHandler("weekly", weekly))
     app.add_handler(CommandHandler("yearly", yearly))
     app.add_handler(CallbackQueryHandler(button_callback))
+
+    # Setze Bot-Menü beim Start
+    app.add_post_init_hook(set_bot_commands)
 
     # Starte Webhook
     app.run_webhook(
