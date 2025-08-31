@@ -1,6 +1,6 @@
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler
-from telegram.ext.filters import Filters  # Korrigierter Import für Filters
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
+from telegram.ext import filters  # Korrigierter Import für filters
 import os
 from datetime import datetime, timedelta
 
@@ -211,7 +211,7 @@ def main():
     app.add_handler(CommandHandler("yearly", yearly))
     app.add_handler(CallbackQueryHandler(button_callback))
     # Füge MessageHandler für Custom Keyboard Buttons hinzu
-    app.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_keyboard_buttons))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_keyboard_buttons))
 
     # Starte Webhook (kein set_my_commands, um linken Menü-Button zu entfernen)
     app.run_webhook(
