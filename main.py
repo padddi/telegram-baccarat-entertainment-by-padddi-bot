@@ -53,25 +53,25 @@ async def daily(update, context):
     # Simuliere Ergebnisse für die aktuelle Woche (Platzhalter)
     today = datetime.now()
     week_start = today - timedelta(days=today.weekday())
-    results = [  # PLATZHALTER_DAILY_RESULTS: Ersetze mit echten Daten
-        (week_start + timedelta(days=i)).strftime("%Y-%m-%d"): f"{1.00 + i * 0.1:.2f}" 
+    results = {  # PLATZHALTER_DAILY_RESULTS: Ersetze mit echten Daten
+        (week_start + timedelta(days=i)).strftime("%Y-%m-%d"): f"{1.00 + i * 0.1:.2f}"
         for i in range(7)
-    ]
+    }
     # Konsolen-Format mit Markdown
     message = "📅 *Ergebnisse der aktuellen Woche*\n```\n"
-    for date, result in results:
+    for date, result in results.items():
         message += f"{date}: {result} %\n"
     message += "```"
     await update.message.reply_text(message, parse_mode="Markdown")
 
 async def weekly(update, context):
     # Simuliere Ergebnisse für 52 Wochen (Platzhalter)
-    results = [  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
-        (f"Woche {i+1}"): f"{1.00 + i * 0.05:.2f}" for i in range(52)
-    ]
+    results = {  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
+        f"Woche {i+1}": f"{1.00 + i * 0.05:.2f}" for i in range(52)
+    }
     # Konsolen-Format mit Markdown
     message = "🗓️ *Ergebnisse aller Wochen 2025*\n```\n"
-    for week, result in results:
+    for week, result in results.items():
         message += f"{week}: {result} %\n"
     message += "```"
     await update.message.reply_text(message, parse_mode="Markdown")
@@ -107,21 +107,21 @@ async def button_callback(update, context):
     elif query.data == "cmd_daily":
         today = datetime.now()
         week_start = today - timedelta(days=today.weekday())
-        results = [  # PLATZHALTER_DAILY_RESULTS: Ersetze mit echten Daten
-            (week_start + timedelta(days=i)).strftime("%Y-%m-%d"): f"{1.00 + i * 0.1:.2f}" 
+        results = {  # PLATZHALTER_DAILY_RESULTS: Ersetze mit echten Daten
+            (week_start + timedelta(days=i)).strftime("%Y-%m-%d"): f"{1.00 + i * 0.1:.2f}"
             for i in range(7)
-        ]
+        }
         message = "📅 *Ergebnisse der aktuellen Woche*\n```\n"
-        for date, result in results:
+        for date, result in results.items():
             message += f"{date}: {result} %\n"
         message += "```"
         await query.message.reply_text(message, parse_mode="Markdown")
     elif query.data == "cmd_weekly":
-        results = [  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
-            (f"Woche {i+1}"): f"{1.00 + i * 0.05:.2f}" for i in range(52)
-        ]
+        results = {  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
+            f"Woche {i+1}": f"{1.00 + i * 0.05:.2f}" for i in range(52)
+        }
         message = "🗓️ *Ergebnisse aller Wochen 2025*\n```\n"
-        for week, result in results:
+        for week, result in results.items():
             message += f"{week}: {result} %\n"
         message += "```"
         await query.message.reply_text(message, parse_mode="Markdown")
