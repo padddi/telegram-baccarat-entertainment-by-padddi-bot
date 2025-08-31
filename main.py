@@ -10,7 +10,7 @@ TOKEN = os.getenv("TELEGRAM_TOKEN")
 async def start(update, context):
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Letztes Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
@@ -20,7 +20,7 @@ async def start(update, context):
         "Willkommen im BE Bot Dashboard. Du hast folgende Möglichkeiten zur Auswahl:\n\n"
         "ℹ️ *Info*: Zeigt Infos zum Bot\n"
         "Befehl: /info\n\n"
-        "📈 *Result*: Zeigt das heutige Ergebnis\n"
+        "📈 *Result*: Zeigt das letzte Ergebnis\n"
         "Befehl: /result\n\n"
         "📅 *Daily*: Ergebnisse dieser Woche\n"
         "Befehl: /daily\n\n"
@@ -35,7 +35,7 @@ async def start(update, context):
 async def dashboard(update, context):
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Letztes Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
@@ -45,7 +45,7 @@ async def dashboard(update, context):
         "Willkommen im BE Bot Dashboard. Du hast folgende Möglichkeiten zur Auswahl:\n\n"
         "ℹ️ *Info*: Zeigt Infos zum Bot\n"
         "Befehl: /info\n\n"
-        "📈 *Result*: Zeigt das heutige Ergebnis\n"
+        "📈 *Result*: Zeigt das letzte Ergebnis\n"
         "Befehl: /result\n\n"
         "📅 *Daily*: Ergebnisse dieser Woche\n"
         "Befehl: /daily\n\n"
@@ -60,7 +60,7 @@ async def dashboard(update, context):
 async def info(update, context):
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Letztes Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
@@ -70,7 +70,7 @@ async def info(update, context):
         "Willkommen im BE Bot Dashboard. Du hast folgende Möglichkeiten zur Auswahl:\n\n"
         "ℹ️ *Info*: Zeigt Infos zum Bot\n"
         "Befehl: /info\n\n"
-        "📈 *Result*: Zeigt das heutige Ergebnis\n"
+        "📈 *Result*: Zeigt das letzte Ergebnis\n"
         "Befehl: /result\n\n"
         "📅 *Daily*: Ergebnisse dieser Woche\n"
         "Befehl: /daily\n\n"
@@ -85,7 +85,7 @@ async def info(update, context):
 async def result(update, context):
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Letztes Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
@@ -102,7 +102,7 @@ async def result(update, context):
 async def daily(update, context):
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Letztes Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
@@ -124,7 +124,7 @@ async def daily(update, context):
 async def weekly(update, context):
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Letztes Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
@@ -144,7 +144,7 @@ async def weekly(update, context):
 async def yearly(update, context):
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Letztes Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
@@ -164,14 +164,14 @@ async def handle_keyboard_buttons(update, context):
     text = update.message.text
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Letztes Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     if text == "ℹ️ Info":
         await info(update, context)
-    elif text == "📈 Heutiges Ergebnis":
+    elif text == "📈 Letztes Ergebnis":
         await result(update, context)
     elif text == "📅 Ergebnisse (Aktuelle Woche)":
         await daily(update, context)
@@ -190,7 +190,7 @@ async def button_callback(update, context):
     await query.answer(text=f"Du hast {query.data.replace('cmd_', '')} gewählt!")  # Bestätigungsmeldung
     # Definiere Custom Keyboard für Inline-Button-Antworten
     keyboard = [
-        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Letztes Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
@@ -201,7 +201,7 @@ async def button_callback(update, context):
             "Willkommen im BE Bot Dashboard. Du hast folgende Möglichkeiten zur Auswahl:\n\n"
             "ℹ️ *Info*: Zeigt Infos zum Bot\n"
             "Befehl: /info\n\n"
-            "📈 *Result*: Zeigt das heutige Ergebnis\n"
+            "📈 *Result*: Zeigt das letzte Ergebnis\n"
             "Befehl: /result\n\n"
             "📅 *Daily*: Ergebnisse dieser Woche\n"
             "Befehl: /daily\n\n"
