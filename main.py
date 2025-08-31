@@ -11,18 +11,18 @@ async def start(update, context):
     # Definiere Custom Keyboard
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
-        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     message = (
         "*📊 Dein Bot-Dashboard 📊*\n"
         "Wähle einen Befehl aus:\n\n"
-        "ℹ️ *Info*: Zeigt Infos zum Bot\n"
-        "📈 *Result*: Zeigt das heutige Ergebnis\n"
-        "📅 *Daily*: Ergebnisse dieser Woche\n"
-        "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
-        "🗂️ *Yearly*: Ergebnisse des Jahres\n\n"
+        "ℹ️ *Info*: Zeigt Infos zum Bot (/info)\n"
+        "📈 *Result*: Zeigt das heutige Ergebnis (/result)\n"
+        "📅 *Daily*: Ergebnisse dieser Woche (/daily)\n"
+        "🗓️ *Weekly*: Ergebnisse aller Wochen (/weekly)\n"
+        "🗂️ *Yearly*: Ergebnisse des Jahres (/yearly)\n\n"
         "Bitte wähle einen Befehl aus dem unteren Menü."
     )
     await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
@@ -31,18 +31,18 @@ async def dashboard(update, context):
     # Definiere Custom Keyboard
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
-        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     message = (
         "*📊 Dein Bot-Dashboard 📊*\n"
         "Wähle einen Befehl aus:\n\n"
-        "ℹ️ *Info*: Zeigt Infos zum Bot\n"
-        "📈 *Result*: Zeigt das heutige Ergebnis\n"
-        "📅 *Daily*: Ergebnisse dieser Woche\n"
-        "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
-        "🗂️ *Yearly*: Ergebnisse des Jahres\n\n"
+        "ℹ️ *Info*: Zeigt Infos zum Bot (/info)\n"
+        "📈 *Result*: Zeigt das heutige Ergebnis (/result)\n"
+        "📅 *Daily*: Ergebnisse dieser Woche (/daily)\n"
+        "🗓️ *Weekly*: Ergebnisse aller Wochen (/weekly)\n"
+        "🗂️ *Yearly*: Ergebnisse des Jahres (/yearly)\n\n"
         "Bitte wähle einen Befehl aus dem unteren Menü."
     )
     await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
@@ -51,18 +51,18 @@ async def info(update, context):
     # Definiere Custom Keyboard
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
-        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     message = (
         "*📊 Dein Bot-Dashboard 📊*\n"
         "Wähle einen Befehl aus:\n\n"
-        "ℹ️ *Info*: Zeigt Infos zum Bot\n"
-        "📈 *Result*: Zeigt das heutige Ergebnis\n"
-        "📅 *Daily*: Ergebnisse dieser Woche\n"
-        "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
-        "🗂️ *Yearly*: Ergebnisse des Jahres\n\n"
+        "ℹ️ *Info*: Zeigt Infos zum Bot (/info)\n"
+        "📈 *Result*: Zeigt das heutige Ergebnis (/result)\n"
+        "📅 *Daily*: Ergebnisse dieser Woche (/daily)\n"
+        "🗓️ *Weekly*: Ergebnisse aller Wochen (/weekly)\n"
+        "🗂️ *Yearly*: Ergebnisse des Jahres (/yearly)\n\n"
         "Bitte wähle einen Befehl aus dem unteren Menü."
     )
     await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
@@ -71,7 +71,7 @@ async def result(update, context):
     # Definiere Custom Keyboard
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
-        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -88,7 +88,7 @@ async def daily(update, context):
     # Definiere Custom Keyboard
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
-        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -109,25 +109,59 @@ async def weekly(update, context):
     # Definiere Custom Keyboard
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
-        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    # Setze Wochen-Offset auf 0 für /weekly
+    context.user_data['week_offset'] = 0
     # Simuliere Ergebnisse für 52 Wochen (Platzhalter)
     results = {  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
         f"Woche {i+1}": f"{1.00 + i * 0.05:.2f}" for i in range(52)
     }
-    # Normales Markdown-Format
-    message = "🗓️ *Ergebnisse aller Wochen 2025*\n\n"
-    for week, result in results.items():
+    # Zeige nur 4 Wochen an
+    start_week = context.user_data['week_offset']
+    end_week = start_week + 4
+    message = "🗓️ *Ergebnisse (Monate)*\n\n"
+    for week, result in list(results.items())[start_week:end_week]:
         message += f"{week}: {result}%\n"
+    message += "\nVerwende /next, um die nächsten Wochen anzuzeigen."
+    await update.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
+
+async def next(update, context):
+    # Definiere Custom Keyboard
+    keyboard = [
+        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
+        ["🗂️ Ergebnisse (Aktuelles Jahr)"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    # Erhöhe Wochen-Offset um 4
+    context.user_data['week_offset'] = context.user_data.get('week_offset', 0) + 4
+    # Simuliere Ergebnisse für 52 Wochen (Platzhalter)
+    results = {  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
+        f"Woche {i+1}": f"{1.00 + i * 0.05:.2f}" for i in range(52)
+    }
+    # Zeige nur 4 Wochen an
+    start_week = context.user_data['week_offset']
+    end_week = start_week + 4
+    if start_week >= len(results):
+        context.user_data['week_offset'] = 0  # Zurücksetzen, wenn Ende erreicht
+        start_week = 0
+        end_week = 4
+        message = "🗓️ *Ergebnisse (Monate)*\n\nZurück zu den ersten Wochen:\n\n"
+    else:
+        message = "🗓️ *Ergebnisse (Monate)*\n\n"
+    for week, result in list(results.items())[start_week:end_week]:
+        message += f"{week}: {result}%\n"
+    message += "\nVerwende /next, um die nächsten Wochen anzuzeigen."
     await update.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
 
 async def yearly(update, context):
     # Definiere Custom Keyboard
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
-        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -147,7 +181,7 @@ async def handle_keyboard_buttons(update, context):
     # Definiere Custom Keyboard
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
-        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -157,7 +191,7 @@ async def handle_keyboard_buttons(update, context):
         await result(update, context)
     elif text == "📅 Ergebnisse (Aktuelle Woche)":
         await daily(update, context)
-    elif text == "🗓️ Ergebnisse (Aktueller Monat)":
+    elif text == "🗓️ Ergebnisse (Monate)":
         await weekly(update, context)
     elif text == "🗂️ Ergebnisse (Aktuelles Jahr)":
         await yearly(update, context)
@@ -173,7 +207,7 @@ async def button_callback(update, context):
     # Definiere Custom Keyboard für Inline-Button-Antworten
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
-        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Monate)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -181,11 +215,11 @@ async def button_callback(update, context):
         message = (
             "*📊 Dein Bot-Dashboard 📊*\n"
             "Wähle einen Befehl aus:\n\n"
-            "ℹ️ *Info*: Zeigt Infos zum Bot\n"
-            "📈 *Result*: Zeigt das heutige Ergebnis\n"
-            "📅 *Daily*: Ergebnisse dieser Woche\n"
-            "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
-            "🗂️ *Yearly*: Ergebnisse des Jahres\n\n"
+            "ℹ️ *Info*: Zeigt Infos zum Bot (/info)\n"
+            "📈 *Result*: Zeigt das heutige Ergebnis (/result)\n"
+            "📅 *Daily*: Ergebnisse dieser Woche (/daily)\n"
+            "🗓️ *Weekly*: Ergebnisse aller Wochen (/weekly)\n"
+            "🗂️ *Yearly*: Ergebnisse des Jahres (/yearly)\n\n"
             "Bitte wähle einen Befehl aus dem unteren Menü."
         )
         await query.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
@@ -210,12 +244,17 @@ async def button_callback(update, context):
             message += f"{date}: {result}%\n"
         await query.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
     elif query.data == "cmd_weekly":
+        # Setze Wochen-Offset auf 0 für cmd_weekly
+        context.user_data['week_offset'] = 0
         results = {  # PLATZHALTER_WEEKLY_RESULTS: Ersetze mit echten Daten
             f"Woche {i+1}": f"{1.00 + i * 0.05:.2f}" for i in range(52)
         }
-        message = "🗓️ *Ergebnisse aller Wochen 2025*\n\n"
-        for week, result in results.items():
+        start_week = context.user_data['week_offset']
+        end_week = start_week + 4
+        message = "🗓️ *Ergebnisse (Monate)*\n\n"
+        for week, result in list(results.items())[start_week:end_week]:
             message += f"{week}: {result}%\n"
+        message += "\nVerwende /next, um die nächsten Wochen anzuzeigen."
         await query.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
     elif query.data == "cmd_yearly":
         results = [  # PLATZHALTER_YEARLY_RESULTS: Ersetze mit echten Daten
@@ -237,6 +276,7 @@ def main():
     app.add_handler(CommandHandler("result", result))
     app.add_handler(CommandHandler("daily", daily))
     app.add_handler(CommandHandler("weekly", weekly))
+    app.add_handler(CommandHandler("next", next))
     app.add_handler(CommandHandler("yearly", yearly))
     app.add_handler(CallbackQueryHandler(button_callback))
     # Füge MessageHandler für Custom Keyboard Buttons hinzu
