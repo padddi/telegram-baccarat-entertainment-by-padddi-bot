@@ -1,11 +1,24 @@
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
-from telegram.ext import filters  # Korrigierter Import für filters
+from telegram.ext import filters
 import os
 from datetime import datetime, timedelta
 
 # Bot-Token aus Umgebungsvariablen
 TOKEN = os.getenv("TELEGRAM_TOKEN")
+
+async def start(update, context):
+    # Definiere Custom Keyboard
+    keyboard = [
+        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["🗂️ Ergebnisse (Aktuelles Jahr)"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    await update.message.reply_text(
+        "Willkommen! Wähle einen Befehl aus der Tastatur.",
+        reply_markup=reply_markup
+    )
 
 async def dashboard(update, context):
     # Definiere Inline-Buttons für /dashboard (im Chat)
@@ -24,29 +37,38 @@ async def dashboard(update, context):
         "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
         "🗂️ *Yearly*: Ergebnisse des Jahres"
     )
-    # Entferne Custom Keyboard, um Standard-Tastatur bei /dashboard zu zeigen
     await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
 
 async def info(update, context):
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    await update.message.reply_text(
-        "ℹ️ *Info*\n"
-        "Dies ist ein Platzhaltertext für den Bot. Er beschreibt, worum es geht. "
-        "#PLATZHALTER_INFO_TEXT",  # Platzhalter für späteren Info-Text
-        parse_mode="Markdown",
-        reply_markup=reply_markup
+    # Zeige Willkommensnachricht wie bei /dashboard
+    inline_keyboard = [
+        [InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"), InlineKeyboardButton("📈 Result", callback_data="cmd_result")],
+        [InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"), InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly")],
+        [InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly")]
+    ]
+    inline_reply_markup = InlineKeyboardMarkup(inline_keyboard)
+    message = (
+        "*📊 Dein Bot-Dashboard 📊*\n"
+        "Wähle einen Befehl aus:\n\n"
+        "ℹ️ *Info*: Zeigt Infos zum Bot\n"
+        "📈 *Result*: Zeigt das heutige Ergebnis\n"
+        "📅 *Daily*: Ergebnisse dieser Woche\n"
+        "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
+        "🗂️ *Yearly*: Ergebnisse des Jahres"
     )
+    await update.message.reply_text(message, reply_markup=inline_reply_markup, parse_mode="Markdown")
 
 async def result(update, context):
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
@@ -63,7 +85,7 @@ async def result(update, context):
 async def daily(update, context):
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
@@ -84,7 +106,7 @@ async def daily(update, context):
 async def weekly(update, context):
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
@@ -102,7 +124,7 @@ async def weekly(update, context):
 async def yearly(update, context):
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
@@ -122,12 +144,12 @@ async def handle_keyboard_buttons(update, context):
     text = update.message.text
     # Definiere Custom Keyboard
     keyboard = [
-        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    if text == "ℹ️ Informationen":
+    if text == "ℹ️ Info":
         await info(update, context)
     elif text == "📈 Heutiges Ergebnis":
         await result(update, context)
@@ -148,19 +170,28 @@ async def button_callback(update, context):
     await query.answer(text=f"Du hast {query.data.replace('cmd_', '')} gewählt!")  # Bestätigungsmeldung
     # Definiere Custom Keyboard für Inline-Button-Antworten
     keyboard = [
-        ["ℹ️ Informationen", "📈 Heutiges Ergebnis"],
+        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
         ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     if query.data == "cmd_info":
-        await query.message.reply_text(
-            "ℹ️ *Info*\n"
-            "Dies ist ein Platzhaltertext für den Bot. Er beschreibt, worum es geht. "
-            "#PLATZHALTER_INFO_TEXT",  # Platzhalter für späteren Info-Text
-            parse_mode="Markdown",
-            reply_markup=reply_markup
+        inline_keyboard = [
+            [InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"), InlineKeyboardButton("📈 Result", callback_data="cmd_result")],
+            [InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"), InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly")],
+            [InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly")]
+        ]
+        inline_reply_markup = InlineKeyboardMarkup(inline_keyboard)
+        message = (
+            "*📊 Dein Bot-Dashboard 📊*\n"
+            "Wähle einen Befehl aus:\n\n"
+            "ℹ️ *Info*: Zeigt Infos zum Bot\n"
+            "📈 *Result*: Zeigt das heutige Ergebnis\n"
+            "📅 *Daily*: Ergebnisse dieser Woche\n"
+            "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
+            "🗂️ *Yearly*: Ergebnisse des Jahres"
         )
+        await query.message.reply_text(message, reply_markup=inline_reply_markup, parse_mode="Markdown")
     elif query.data == "cmd_result":
         result_percent = "1.04"  # PLATZHALTER_RESULT_PERCENT: Ersetze mit echtem Wert
         today = datetime.now().strftime("%Y-%m-%d")  # Aktuelles Datum
@@ -203,6 +234,7 @@ def main():
     app = Application.builder().token(TOKEN).build()
 
     # Füge Befehle hinzu
+    app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("dashboard", dashboard))
     app.add_handler(CommandHandler("info", info))
     app.add_handler(CommandHandler("result", result))
