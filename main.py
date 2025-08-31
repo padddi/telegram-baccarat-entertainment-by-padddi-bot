@@ -32,6 +32,10 @@ DASHBOARD_MESSAGE = (
     "Bitte wähle einen Befehl aus dem unteren Menü."
 )
 
+def format_percent(value):
+    """Formatiert einen Float-Wert als ###,##%."""
+    return f"{value:.2f}".replace(".", ",")
+
 async def fetch_airtable_data(context, year):
     """Holt Daten aus Airtable für ein gegebenes Jahr und speichert sie im Cache."""
     cache_key = f"airtable_cache_{year}"
@@ -59,7 +63,6 @@ async def fetch_airtable_data(context, year):
             for r in data.get("records", []):
                 if "Date" not in r["fields"] or "Result" not in r["fields"]:
                     continue
-                # Versuche ISO-Format, dann DD.MM.YYYY als Fallback
                 date_str = r["fields"]["Date"]
                 try:
                     datetime.strptime(date_str, "%Y-%m-%d")
@@ -67,17 +70,15 @@ async def fetch_airtable_data(context, year):
                 except ValueError:
                     try:
                         datetime.strptime(date_str, "%d.%m.%Y")
-                        # Konvertiere DD.MM.YYYY zu YYYY-MM-DD für Konsistenz
                         date_obj = datetime.strptime(date_str, "%d.%m.%Y")
                         records.append({"Date": date_obj.strftime("%Y-%m-%d"), "Result": r["fields"]["Result"]})
                     except ValueError:
-                        continue  # Ignoriere ungültige Daten
+                        continue
             if "offset" not in data:
                 break
             params["offset"] = data["offset"]
-    except requests.RequestException as e:
-        # Fallback auf Cache bei API-Fehler
-        return context.bot_data.get(cache_key, [])
+    except requests.RequestException:
+        return context.bot_data.get(cache_key, [])  # Fallback auf Cache
     
     context.bot_data[cache_key] = records
     context.bot_data[timestamp_key] = datetime.now()
@@ -90,6 +91,10 @@ async def get_all_data(context):
         data.extend(await fetch_airtable_data(context, year))
     return data
 
+async def get_current_year_data(context):
+    """Holt Daten nur für das aktuelle Jahr (2025)."""
+    return await fetch_airtable_data(context, "2025")
+
 async def start(update, context):
     await update.message.reply_text(DASHBOARD_MESSAGE, reply_markup=KEYBOARD, parse_mode="Markdown")
 
@@ -100,21 +105,20 @@ async def info(update, context):
     await update.message.reply_text(DASHBOARD_MESSAGE, reply_markup=KEYBOARD, parse_mode="Markdown")
 
 async def result(update, context):
-    data = await get_all_data(context)
+    data = await get_current_year_data(context)
     if not data:
         await update.message.reply_text("Keine Daten verfügbar.", reply_markup=KEYBOARD)
         return
     try:
         latest = max(data, key=lambda x: datetime.strptime(x["Date"], "%Y-%m-%d"))
-        # Konvertiere Datum zurück in DD.MM.YYYY für die Anzeige
         display_date = datetime.strptime(latest["Date"], "%Y-%m-%d").strftime("%d.%m.%Y")
-        message = f"📈 *Letztes Ergebnis vom {display_date}*\n\n✅ {latest['Result']}%"
+        message = f"📈 *Letztes Ergebnis vom {display_date}*\n\n✅ {format_percent(latest['Result'])}%"
     except (ValueError, KeyError):
         message = "Fehler: Ungültiges Datenformat in Airtable."
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
 async def daily(update, context):
-    data = await get_all_data(context)
+    data = await get_current_year_data(context)
     today = datetime.now()
     week_start = today - timedelta(days=today.weekday())
     week_end = week_start + timedelta(days=4)  # Freitag
@@ -128,7 +132,10 @@ async def daily(update, context):
             date_obj = datetime.strptime(r["Date"], "%Y-%m-%d")
             weekday = WEEKDAYS[date_obj.weekday()]
             display_date = date_obj.strftime("%d.%m.%Y")
-            message += f"{display_date}, {weekday}: {r['Result']}%\n"
+            message += f"{display_date}, {weekday}: {format_percent(r['Result'])}%\n"
+        # Kumuliertes Ergebnis (Durchschnitt)
+        avg = sum(r["Result"] for r in week_data) / len(week_data) if week_data else 0
+        message += f"\n📊 *Wochenergebnis*: {format_percent(avg)}%"
     else:
         message += "Keine Ergebnisse für die aktuelle Woche.\n"
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
@@ -139,21 +146,30 @@ async def weekly(update, context):
     current_week = today.isocalendar().week
     message = "🗓️ *Ergebnisse (Monate)*\n\n"
     if data:
-        weekly_results = {}
+        yearly_weekly_results = {}
         for r in data:
             try:
                 date_obj = datetime.strptime(r["Date"], "%Y-%m-%d")
-                year_week = (date_obj.year, date_obj.isocalendar().week)
-                if year_week not in weekly_results:
-                    weekly_results[year_week] = []
-                weekly_results[year_week].append(r["Result"])
+                year, week = date_obj.year, date_obj.isocalendar().week
+                if year not in yearly_weekly_results:
+                    yearly_weekly_results[year] = {}
+                if week not in yearly_weekly_results[year]:
+                    yearly_weekly_results[year][week] = []
+                yearly_weekly_results[year][week].append(r["Result"])
             except ValueError:
                 continue
-        for (year, week), results in sorted(weekly_results.items()):
-            if year == today.year and week > current_week:
-                continue
-            avg = sum(results) / len(results) if results else 0
-            message += f"Woche {week} ({year}): {avg:.2f}%\n"
+        for year in sorted(yearly_weekly_results.keys()):
+            message += f"*{year}*\n"
+            for week in sorted(yearly_weekly_results[year].keys()):
+                if year == today.year and week > current_week:
+                    continue
+                results = yearly_weekly_results[year][week]
+                avg = sum(results) / len(results) if results else 0
+                message += f"Woche {week}: {format_percent(avg)}%\n"
+            # Kumuliertes Ergebnis des Jahres
+            year_results = [r for w in yearly_weekly_results[year].values() for r in w]
+            year_avg = sum(year_results) / len(year_results) if year_results else 0
+            message += f"\n📊 *Jahresergebnis*: {format_percent(year_avg)}%\n\n\n"
     else:
         message += "Keine Ergebnisse verfügbar.\n"
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
@@ -173,7 +189,7 @@ async def yearly(update, context):
                 continue
         for year in sorted(yearly_results.keys()):
             avg = sum(yearly_results[year]) / len(yearly_results[year]) if yearly_results[year] else 0
-            message += f"{year}: {avg:.2f}%"
+            message += f"🗂️ {year}: {format_percent(avg)}%\n\n"
     else:
         message += "Keine Ergebnisse verfügbar.\n"
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
