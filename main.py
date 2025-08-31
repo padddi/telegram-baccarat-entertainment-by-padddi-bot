@@ -38,8 +38,8 @@ DASHBOARD_MESSAGE = (
 )
 
 def format_percent(value):
-    """Formatiert einen Float-Wert als ###,##%."""
-    return f"{value:{PERCENT_FORMAT}}%"
+    """Formatiert einen Float- oder Integer-Wert als ###,##%."""
+    return f"{float(value):{PERCENT_FORMAT}}%".replace(".", ",")
 
 def get_week_date_range(week, year):
     """Gibt den Datumsbereich einer Woche (Montag bis Freitag) zurück."""
@@ -59,6 +59,8 @@ async def fetch_airtable_data(context, year):
     headers = {"Authorization": f"Bearer {os.getenv('AIRTABLE_TOKEN')}"}
     base_id = os.getenv(f"AIRTABLE_BASE_{year}")
     table_id = os.getenv(f"AIRTABLE_TBL_{year}")
+    if not base_id or not table_id:
+        return []
     records = []
     params = {"sort[0][field]": "Date", "sort[0][direction]": "desc"}
     
@@ -88,7 +90,8 @@ async def fetch_airtable_data(context, year):
             if "offset" not in data:
                 break
             params["offset"] = data["offset"]
-    except requests.RequestException:
+    except requests.RequestException as e:
+        print(f"Error fetching Airtable data for {year}: {e}")
         return context.bot_data.get(cache_key, [])  # Fallback auf Cache
     
     context.bot_data[cache_key] = records
@@ -143,7 +146,8 @@ async def result(update, context):
         latest = max(data, key=lambda x: datetime.strptime(x["Date"], "%Y-%m-%d"))
         display_date = datetime.strptime(latest["Date"], "%Y-%m-%d").strftime(DATE_FORMAT)
         message = f"{EMOJIS['result']} *Letztes Ergebnis*\n\n{display_date}: {EMOJIS['result']} {format_percent(latest['Result'])}"
-    except (ValueError, KeyError):
+    except (ValueError, KeyError) as e:
+        print(f"Error in /result: {e}")
         message = f"Hoppla, die Daten konnten nicht geladen werden. Bitte versuche {EMOJIS['refresh']} /refresh oder später erneut."
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
