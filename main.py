@@ -8,13 +8,6 @@ from datetime import datetime, timedelta
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 async def start(update, context):
-    # Definiere Inline-Buttons (wie bei /dashboard)
-    inline_keyboard = [
-        [InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"), InlineKeyboardButton("📈 Result", callback_data="cmd_result")],
-        [InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"), InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly")],
-        [InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly")]
-    ]
-    inline_reply_markup = InlineKeyboardMarkup(inline_keyboard)
     # Definiere Custom Keyboard
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
@@ -29,37 +22,12 @@ async def start(update, context):
         "📈 *Result*: Zeigt das heutige Ergebnis\n"
         "📅 *Daily*: Ergebnisse dieser Woche\n"
         "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
-        "🗂️ *Yearly*: Ergebnisse des Jahres"
+        "🗂️ *Yearly*: Ergebnisse des Jahres\n\n"
+        "Bitte wähle einen Befehl aus dem unteren Menü."
     )
-    await update.message.reply_text(message, reply_markup=inline_reply_markup, parse_mode="Markdown")
+    await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
 
 async def dashboard(update, context):
-    # Definiere Inline-Buttons für /dashboard (im Chat)
-    inline_keyboard = [
-        [InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"), InlineKeyboardButton("📈 Result", callback_data="cmd_result")],
-        [InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"), InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly")],
-        [InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly")]
-    ]
-    inline_reply_markup = InlineKeyboardMarkup(inline_keyboard)
-    message = (
-        "*📊 Dein Bot-Dashboard 📊*\n"
-        "Wähle einen Befehl aus:\n\n"
-        "ℹ️ *Info*: Zeigt Infos zum Bot\n"
-        "📈 *Result*: Zeigt das heutige Ergebnis\n"
-        "📅 *Daily*: Ergebnisse dieser Woche\n"
-        "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
-        "🗂️ *Yearly*: Ergebnisse des Jahres"
-    )
-    await update.message.reply_text(message, reply_markup=inline_reply_markup, parse_mode="Markdown")
-
-async def info(update, context):
-    # Definiere Inline-Buttons (wie bei /dashboard)
-    inline_keyboard = [
-        [InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"), InlineKeyboardButton("📈 Result", callback_data="cmd_result")],
-        [InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"), InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly")],
-        [InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly")]
-    ]
-    inline_reply_markup = InlineKeyboardMarkup(inline_keyboard)
     # Definiere Custom Keyboard
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
@@ -74,9 +42,30 @@ async def info(update, context):
         "📈 *Result*: Zeigt das heutige Ergebnis\n"
         "📅 *Daily*: Ergebnisse dieser Woche\n"
         "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
-        "🗂️ *Yearly*: Ergebnisse des Jahres"
+        "🗂️ *Yearly*: Ergebnisse des Jahres\n\n"
+        "Bitte wähle einen Befehl aus dem unteren Menü."
     )
-    await update.message.reply_text(message, reply_markup=inline_reply_markup, parse_mode="Markdown")
+    await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def info(update, context):
+    # Definiere Custom Keyboard
+    keyboard = [
+        ["ℹ️ Info", "📈 Heutiges Ergebnis"],
+        ["📅 Ergebnisse (Aktuelle Woche)", "🗓️ Ergebnisse (Aktueller Monat)"],
+        ["🗂️ Ergebnisse (Aktuelles Jahr)"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    message = (
+        "*📊 Dein Bot-Dashboard 📊*\n"
+        "Wähle einen Befehl aus:\n\n"
+        "ℹ️ *Info*: Zeigt Infos zum Bot\n"
+        "📈 *Result*: Zeigt das heutige Ergebnis\n"
+        "📅 *Daily*: Ergebnisse dieser Woche\n"
+        "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
+        "🗂️ *Yearly*: Ergebnisse des Jahres\n\n"
+        "Bitte wähle einen Befehl aus dem unteren Menü."
+    )
+    await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
 
 async def result(update, context):
     # Definiere Custom Keyboard
@@ -174,7 +163,7 @@ async def handle_keyboard_buttons(update, context):
         await yearly(update, context)
     else:
         await update.message.reply_text(
-            "Bitte wähle einen Befehl aus der Tastatur.",
+            "Bitte wähle einen Befehl aus dem unteren Menü.",
             reply_markup=reply_markup
         )
 
@@ -189,12 +178,6 @@ async def button_callback(update, context):
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     if query.data == "cmd_info":
-        inline_keyboard = [
-            [InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"), InlineKeyboardButton("📈 Result", callback_data="cmd_result")],
-            [InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"), InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly")],
-            [InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly")]
-        ]
-        inline_reply_markup = InlineKeyboardMarkup(inline_keyboard)
         message = (
             "*📊 Dein Bot-Dashboard 📊*\n"
             "Wähle einen Befehl aus:\n\n"
@@ -202,9 +185,10 @@ async def button_callback(update, context):
             "📈 *Result*: Zeigt das heutige Ergebnis\n"
             "📅 *Daily*: Ergebnisse dieser Woche\n"
             "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
-            "🗂️ *Yearly*: Ergebnisse des Jahres"
+            "🗂️ *Yearly*: Ergebnisse des Jahres\n\n"
+            "Bitte wähle einen Befehl aus dem unteren Menü."
         )
-        await query.message.reply_text(message, reply_markup=inline_reply_markup, parse_mode="Markdown")
+        await query.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
     elif query.data == "cmd_result":
         result_percent = "1.04"  # PLATZHALTER_RESULT_PERCENT: Ersetze mit echtem Wert
         today = datetime.now().strftime("%Y-%m-%d")  # Aktuelles Datum
