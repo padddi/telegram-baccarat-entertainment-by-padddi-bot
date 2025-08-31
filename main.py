@@ -23,13 +23,13 @@ DASHBOARD_MESSAGE = (
     "Befehl: /info\n\n"
     "📈 *Result*: Zeigt das letzte Ergebnis\n"
     "Befehl: /result\n\n"
-    "📅 *Daily*: Ergebnisse dieser Woche\n"
+    "📅 *Daily*: Ergebnisse der aktuellen Woche\n"
     "Befehl: /daily\n\n"
     "🗓️ *Weekly*: Ergebnisse der Wochen des aktuellen Monats\n"
     "Befehl: /weekly\n\n"
     "🗓️ *Monthly*: Ergebnisse aller Monate des aktuellen Jahres\n"
     "Befehl: /monthly\n\n"
-    "🗂️ *Yearly*: Ergebnisse der Jahre\n"
+    "🗂️ *Yearly*: Ergebnisse aller Jahre\n"
     "Befehl: /yearly\n\n"
     "Bitte wähle einen Befehl aus dem unteren Menü."
 )
@@ -37,6 +37,12 @@ DASHBOARD_MESSAGE = (
 def format_percent(value):
     """Formatiert einen Float-Wert als ###,##%."""
     return f"{value:.2f}".replace(".", ",")
+
+def get_week_date_range(week, year):
+    """Gibt den Datumsbereich einer Woche (Montag bis Sonntag) zurück."""
+    first_day = datetime.strptime(f"{year}-W{week}-1", "%Y-W%W-%w")
+    last_day = first_day + timedelta(days=6)
+    return first_day.strftime("%d.%m.%Y"), last_day.strftime("%d.%m.%Y")
 
 async def fetch_airtable_data(context, year):
     """Holt Daten aus Airtable für ein gegebenes Jahr und speichert sie im Cache."""
@@ -128,7 +134,8 @@ async def daily(update, context):
         r for r in data
         if week_start.date() <= datetime.strptime(r["Date"], "%Y-%m-%d").date() <= week_end.date()
     ]
-    message = "📅 *Ergebnisse der aktuellen Woche*\n\n"
+    week_num = today.isocalendar().week
+    message = f"📅 *Ergebnisse der aktuellen Woche (KW {week_num} {today.year})*\n\n"
     if week_data:
         for r in sorted(week_data, key=lambda x: datetime.strptime(x["Date"], "%Y-%m-%d")):
             date_obj = datetime.strptime(r["Date"], "%Y-%m-%d")
@@ -146,7 +153,12 @@ async def weekly(update, context):
     data = await get_current_year_data(context)
     today = datetime.now()
     current_month = today.month
-    message = "🗓️ *Wochen (Aktueller Monat)*\n\n"
+    month_names = [
+        "Januar", "Februar", "März", "April", "Mai", "Juni",
+        "Juli", "August", "September", "Oktober", "November", "Dezember"
+    ]
+    month_name = month_names[current_month - 1]
+    message = f"🗓️ *Ergebnisse des aktuellen Monats ({month_name} {today.year})*\n\n"
     if data:
         weekly_results = {}
         for r in data:
@@ -161,10 +173,10 @@ async def weekly(update, context):
             except ValueError:
                 continue
         if weekly_results:
-            message += f"*{today.year}*\n"
             for week in sorted(weekly_results.keys()):
                 total = sum(weekly_results[week]) if weekly_results[week] else 0
-                message += f"Woche {week}: {format_percent(total)}%\n"
+                start_date, end_date = get_week_date_range(week, today.year)
+                message += f"KW {week} ({start_date} - {end_date}): {format_percent(total)}%\n"
             # Monatsergebnis (Summe aller Ergebnisse im Monat)
             month_results = [r for w in weekly_results.values() for r in w]
             month_total = sum(month_results) if month_results else 0
@@ -178,7 +190,7 @@ async def weekly(update, context):
 async def monthly(update, context):
     data = await get_current_year_data(context)
     today = datetime.now()
-    message = "🗓️ *Ergebnisse (Monate)*\n\n"
+    message = f"🗓️ *Ergebnisse des aktuellen Jahres ({today.year})*\n\n"
     if data:
         monthly_results = {}
         month_names = [
@@ -202,13 +214,17 @@ async def monthly(update, context):
             total = sum(monthly_results[month]) if monthly_results[month] else 0
             month_name = month_names[month - 1]
             message += f"🗓️ {month_name} {today.year}: {format_percent(total)}%\n\n"
+        # Jahresergebnis (Summe aller Monate)
+        year_results = [r for m in monthly_results.values() for r in m]
+        year_total = sum(year_results) if year_results else 0
+        message += f"📊 *Jahresergebnis*: {format_percent(year_total)}%"
     else:
         message += "Keine Daten verfügbar.\n"
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
 async def yearly(update, context):
     data = await get_all_data(context)
-    message = "🗂️ *Ergebnisse (Jahre)*\n\n"
+    message = "🗂️ *Ergebnisse aller Jahre*\n\n"
     if data:
         yearly_results = {}
         for r in data:
@@ -220,8 +236,12 @@ async def yearly(update, context):
             except ValueError:
                 continue
         for year in sorted(yearly_results.keys()):
-            avg = sum(yearly_results[year]) / len(yearly_results[year]) if yearly_results[year] else 0
-            message += f"🗂️ {year}: {format_percent(avg)}%\n\n"
+            total = sum(yearly_results[year]) if yearly_results[year] else 0
+            message += f"🗂️ {year}: {format_percent(total)}%\n\n"
+        # Gesamtergebnis (Summe aller Jahre)
+        all_results = [r for y in yearly_results.values() for r in y]
+        all_total = sum(all_results) if all_results else 0
+        message += f"📊 *Gesamtergebnis*: {format_percent(all_total)}%"
     else:
         message += "Keine Daten verfügbar.\n"
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
