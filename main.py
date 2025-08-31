@@ -133,9 +133,9 @@ async def daily(update, context):
             weekday = WEEKDAYS[date_obj.weekday()]
             display_date = date_obj.strftime("%d.%m.%Y")
             message += f"{display_date}, {weekday}: {format_percent(r['Result'])}%\n"
-        # Kumuliertes Ergebnis (Durchschnitt)
-        avg = sum(r["Result"] for r in week_data) / len(week_data) if week_data else 0
-        message += f"\n📊 *Wochenergebnis*: {format_percent(avg)}%"
+        # Kumuliertes Ergebnis (Summe)
+        total = sum(r["Result"] for r in week_data) if week_data else 0
+        message += f"\n📊 *Wochenergebnis*: {format_percent(total)}%"
     else:
         message += "Keine Ergebnisse für die aktuelle Woche.\n"
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
