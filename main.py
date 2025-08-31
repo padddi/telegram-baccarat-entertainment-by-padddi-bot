@@ -8,6 +8,13 @@ from datetime import datetime, timedelta
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 async def start(update, context):
+    # Definiere Inline-Buttons (wie bei /dashboard)
+    inline_keyboard = [
+        [InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"), InlineKeyboardButton("📈 Result", callback_data="cmd_result")],
+        [InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"), InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly")],
+        [InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly")]
+    ]
+    inline_reply_markup = InlineKeyboardMarkup(inline_keyboard)
     # Definiere Custom Keyboard
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
@@ -15,19 +22,6 @@ async def start(update, context):
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    await update.message.reply_text(
-        "Willkommen! Wähle einen Befehl aus der Tastatur.",
-        reply_markup=reply_markup
-    )
-
-async def dashboard(update, context):
-    # Definiere Inline-Buttons für /dashboard (im Chat)
-    keyboard = [
-        [InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"), InlineKeyboardButton("📈 Result", callback_data="cmd_result")],
-        [InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"), InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly")],
-        [InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     message = (
         "*📊 Dein Bot-Dashboard 📊*\n"
         "Wähle einen Befehl aus:\n\n"
@@ -37,9 +31,35 @@ async def dashboard(update, context):
         "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
         "🗂️ *Yearly*: Ergebnisse des Jahres"
     )
-    await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+    await update.message.reply_text(message, reply_markup=inline_reply_markup, parse_mode="Markdown")
+
+async def dashboard(update, context):
+    # Definiere Inline-Buttons für /dashboard (im Chat)
+    inline_keyboard = [
+        [InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"), InlineKeyboardButton("📈 Result", callback_data="cmd_result")],
+        [InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"), InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly")],
+        [InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly")]
+    ]
+    inline_reply_markup = InlineKeyboardMarkup(inline_keyboard)
+    message = (
+        "*📊 Dein Bot-Dashboard 📊*\n"
+        "Wähle einen Befehl aus:\n\n"
+        "ℹ️ *Info*: Zeigt Infos zum Bot\n"
+        "📈 *Result*: Zeigt das heutige Ergebnis\n"
+        "📅 *Daily*: Ergebnisse dieser Woche\n"
+        "🗓️ *Weekly*: Ergebnisse aller Wochen\n"
+        "🗂️ *Yearly*: Ergebnisse des Jahres"
+    )
+    await update.message.reply_text(message, reply_markup=inline_reply_markup, parse_mode="Markdown")
 
 async def info(update, context):
+    # Definiere Inline-Buttons (wie bei /dashboard)
+    inline_keyboard = [
+        [InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"), InlineKeyboardButton("📈 Result", callback_data="cmd_result")],
+        [InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"), InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly")],
+        [InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly")]
+    ]
+    inline_reply_markup = InlineKeyboardMarkup(inline_keyboard)
     # Definiere Custom Keyboard
     keyboard = [
         ["ℹ️ Info", "📈 Heutiges Ergebnis"],
@@ -47,13 +67,6 @@ async def info(update, context):
         ["🗂️ Ergebnisse (Aktuelles Jahr)"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    # Zeige Willkommensnachricht wie bei /dashboard
-    inline_keyboard = [
-        [InlineKeyboardButton("ℹ️ Info", callback_data="cmd_info"), InlineKeyboardButton("📈 Result", callback_data="cmd_result")],
-        [InlineKeyboardButton("📅 Daily", callback_data="cmd_daily"), InlineKeyboardButton("🗓️ Weekly", callback_data="cmd_weekly")],
-        [InlineKeyboardButton("🗂️ Yearly", callback_data="cmd_yearly")]
-    ]
-    inline_reply_markup = InlineKeyboardMarkup(inline_keyboard)
     message = (
         "*📊 Dein Bot-Dashboard 📊*\n"
         "Wähle einen Befehl aus:\n\n"
