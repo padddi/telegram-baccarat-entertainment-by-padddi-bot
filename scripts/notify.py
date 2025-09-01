@@ -1,6 +1,9 @@
-import requests
 import sys
 import os
+import requests
+from telegram import Bot
+from telegram.constants import ParseMode
+import asyncio
 
 # Konfiguration (aus Umgebungsvariablen laden – in GitHub Secrets speichern)
 AIRTABLE_TOKEN = os.getenv('AIRTABLE_TOKEN')  # Dein Airtable Token
@@ -10,6 +13,7 @@ CHAT_ID_FIELD = 'ChatId'  # Festgelegter Feldname für Chat-IDs
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')  # Dein Telegram Bot Token
 
 # Markdown-Nachricht (vom User bereitgestellt – hier als Beispiel; kann als Argument übergeben werden)
+# Für MarkdownV2 müssen bestimmte Zeichen escaped werden (z.B. '.', '!', '-')
 MESSAGE = """
 🚨 **Neue Benachrichtigung!**
 
@@ -40,20 +44,21 @@ def get_chat_ids():
     
     return chat_ids
 
-def send_telegram_message(chat_id, message):
+async def send_telegram_message(bot, chat_id, message):
     """
-    Sendet eine Markdown-Nachricht an eine Chat-ID via Telegram API.
+    Sendet eine Markdown-Nachricht an eine Chat-ID via python-telegram-bot SDK.
     """
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {
-        'chat_id': chat_id,
-        'text': message,
-        'parse_mode': 'Markdown'  # Für Markdown-Formatierung
-    }
-    response = requests.post(url, json=payload)
-    response.raise_for_status()  # Fehler werfen, wenn Senden scheitert
+    try:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=message,
+            parse_mode=ParseMode.MARKDOWN_V2  # MarkdownV2 für Telegram
+        )
+        print(f"Nachricht gesendet an {chat_id}")
+    except Exception as e:
+        print(f"Fehler beim Senden an {chat_id}: {e}")
 
-def main():
+async def main():
     # Optional: Nachricht als Kommandozeilen-Argument übernehmen (z.B. für dynamische Inhalte)
     if len(sys.argv) > 1:
         global MESSAGE
@@ -63,17 +68,18 @@ def main():
     chat_ids = get_chat_ids()
     print(f"Gefundene Chat-IDs: {len(chat_ids)}")
     
+    # Telegram Bot initialisieren
+    bot = Bot(token=TELEGRAM_TOKEN)
+    
     # Für jede Chat-ID senden
     for chat_id in chat_ids:
-        try:
-            send_telegram_message(chat_id, MESSAGE)
-            print(f"Nachricht gesendet an {chat_id}")
-        except Exception as e:
-            print(f"Fehler beim Senden an {chat_id}: {e}")
+        await send_telegram_message(bot, chat_id, MESSAGE)
     
     print("Alle Nachrichten versendet.")
 
 if __name__ == "__main__":
     if not AIRTABLE_TOKEN or not TELEGRAM_TOKEN or not AIRTABLE_NOTIFICATION_BASE or not AIRTABLE_NOTIFICATION_TBL:
         raise ValueError("Eine oder mehrere Umgebungsvariablen fehlen: AIRTABLE_TOKEN, TELEGRAM_TOKEN, AIRTABLE_NOTIFICATION_BASE, AIRTABLE_NOTIFICATION_TBL")
-    main()
+    
+    # Asynchronen Main ausführen
+    asyncio.run(main())
