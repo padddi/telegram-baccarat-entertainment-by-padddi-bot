@@ -31,7 +31,9 @@ jobs:
           AIRTABLE_NOTIFICATION_BASE: ${{ secrets.AIRTABLE_NOTIFICATION_BASE }}
           AIRTABLE_NOTIFICATION_TBL: ${{ secrets.AIRTABLE_NOTIFICATION_TBL }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-        run: python scripts/notify.py "${{ github.event.inputs.message || format('🚨 **Neues Issue!** \n\n- **Titel**: {0}\n- **Link**: {1}', github.event.issue.title, github.event.issue.html_url) }}"  # Dynamische Nachricht für Issues
+        run: |
+          MESSAGE="${{ github.event.inputs.message || format('🚨 **Neues Issue!**\n\n- **Titel**: {0}\n- **Link**: {1}', github.event.issue.title, github.event.issue.html_url) }}"
+          python scripts/notify.py "$MESSAGE"
 
       - name: Close Issue
         if: github.event_name == 'issues'  # Nur bei Issue-Event ausführen
