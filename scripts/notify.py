@@ -4,6 +4,7 @@ import requests
 from telegram import Bot
 from telegram.constants import ParseMode
 import asyncio
+import re
 
 # Konfiguration (aus Umgebungsvariablen laden – in GitHub Secrets speichern)
 AIRTABLE_TOKEN = os.getenv('AIRTABLE_TOKEN')  # Dein Airtable Token
@@ -13,7 +14,6 @@ CHAT_ID_FIELD = 'ChatId'  # Festgelegter Feldname für Chat-IDs
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')  # Dein Telegram Bot Token
 
 # Markdown-Nachricht (vom User bereitgestellt – hier als Beispiel; kann als Argument übergeben werden)
-# Für MarkdownV2 müssen bestimmte Zeichen escaped werden (z.B. '.', '!', '-')
 MESSAGE = """
 🚨 **Neue Benachrichtigung!**
 
@@ -22,7 +22,16 @@ MESSAGE = """
 - **Link**: [Klicke hier](https://example.com)
 
 Mehr Infos folgen.
-"""  # Du kannst das dynamisch machen, z.B. via sys.argv[1]
+"""  # Wird automatisch escaped
+
+def escape_markdown_v2(text):
+    """
+    Escaped reservierte Zeichen für Telegram MarkdownV2.
+    """
+    # Liste der zu escapenden Zeichen gemäß Telegram MarkdownV2
+    reserved_chars = r'([_\*\[\]\(\)~`>#\+-=|{}.!])'
+    # Escape durch Hinzufügen von \ vor das Zeichen
+    return re.sub(reserved_chars, r'\\\1', text)
 
 def get_chat_ids():
     """
@@ -49,9 +58,11 @@ async def send_telegram_message(bot, chat_id, message):
     Sendet eine Markdown-Nachricht an eine Chat-ID via python-telegram-bot SDK.
     """
     try:
+        # Nachricht für MarkdownV2 escapen
+        escaped_message = escape_markdown_v2(message)
         await bot.send_message(
             chat_id=chat_id,
-            text=message,
+            text=escaped_message,
             parse_mode=ParseMode.MARKDOWN_V2  # MarkdownV2 für Telegram
         )
         print(f"Nachricht gesendet an {chat_id}")
