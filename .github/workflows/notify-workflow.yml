@@ -23,7 +23,10 @@ jobs:
           python-version: '3.12'
       
       - name: Install Dependencies
-        run: pip install requests  # Falls nötig (meistens vorinstalliert)
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests python-telegram-bot==20.7  # Explizite Version für Stabilität
+          pip list  # Debugging: Zeigt installierte Pakete
       
       - name: Run Notify Script
         env:
