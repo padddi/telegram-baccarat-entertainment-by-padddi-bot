@@ -1,0 +1,46 @@
+name: Telegram Notify and Close Issue Workflow
+
+on:
+  issues:
+    types: [opened]  # Trigger bei neuem Issue
+  workflow_dispatch:  # Optional: Manuell triggern für Tests
+    inputs:
+      message:  # Eingabe für dynamische Nachricht
+        description: 'Markdown-Nachricht-Inhalt'
+        required: false
+        default: '🚨 **Neue Benachrichtigung!** \n\n- **Titel**: Beispiel-Titel\n- **Details**: Hier kommt dein Markdown-Inhalt hin.\n- **Link**: [Klicke hier](https://example.com)\n\nMehr Infos folgen.'
+
+jobs:
+  notify-and-close:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install Dependencies
+        run: pip install requests  # Falls nötig (meistens vorinstalliert)
+      
+      - name: Run Notify Script
+        env:
+          AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+          AIRTABLE_NOTIFICATION_BASE: ${{ secrets.AIRTABLE_NOTIFICATION_BASE }}
+          AIRTABLE_NOTIFICATION_TBL: ${{ secrets.AIRTABLE_NOTIFICATION_TBL }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        run: python scripts/notify.py "${{ github.event.inputs.message || format('🚨 **Neues Issue!** \n\n- **Titel**: {0}\n- **Link**: {1}', github.event.issue.title, github.event.issue.html_url) }}"  # Dynamische Nachricht für Issues
+
+      - name: Close Issue
+        if: github.event_name == 'issues'  # Nur bei Issue-Event ausführen
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              state: 'closed'
+            });
