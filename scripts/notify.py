@@ -99,7 +99,7 @@ async def main():
     
     # Nachricht im gewünschten Format erstellen
     MESSAGE = f"{EMOJI_ALERT} Neues Ergebnis verfügbar\n" \
-              f"Das heutige Ergebnis steht jetzt im Dashboard von Baccarat-Entertainment zur Verfügung\. Du kannst jetzt deinen Restake durchführen\.\n\n" \
+              f"Das heutige Ergebnis steht jetzt im Dashboard von Baccarat-Entertainment zur Verfügung. Du kannst jetzt deinen Restake durchführen.\n\n" \
               f"[Dashboard]({DASHBOARD_LINK})\n\n" \
               f"{date}: {EMOJI_RESULT} {result}"
     
