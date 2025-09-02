@@ -5,8 +5,11 @@ from telegram import Bot
 from telegram.constants import ParseMode
 import asyncio
 import re
-from airtable import get_current_year_data  # Import der Funktion aus airtable.py
 from datetime import datetime
+
+# Relativen Pfad zu airtable.py hinzufügen
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from airtable import get_current_year_data  # Import der Funktion aus airtable.py im Root-Verzeichnis
 
 # Konfiguration (aus Umgebungsvariablen laden – in GitHub Secrets speichern)
 AIRTABLE_TOKEN = os.getenv('AIRTABLE_TOKEN')  # Dein Airtable Token
