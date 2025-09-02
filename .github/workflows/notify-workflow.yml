@@ -33,6 +33,8 @@ jobs:
           AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
           AIRTABLE_NOTIFICATION_BASE: ${{ secrets.AIRTABLE_NOTIFICATION_BASE }}
           AIRTABLE_NOTIFICATION_TBL: ${{ secrets.AIRTABLE_NOTIFICATION_TBL }}
+          AIRTABLE_BASE_2025: ${{ secrets.AIRTABLE_BASE_2025 }}
+          AIRTABLE_TBL_2025: ${{ secrets.AIRTABLE_TBL_2025 }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: |
           MESSAGE="${{ github.event.inputs.message || format('🚨 **Neues Issue!**\n\n- **Titel**: {0}\n- **Link**: {1}', github.event.issue.title, github.event.issue.html_url) }}"
