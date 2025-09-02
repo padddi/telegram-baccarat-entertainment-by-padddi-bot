@@ -1,7 +1,7 @@
 # main.py
 import os
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
-from handlers import start, dashboard, info, refresh, result, daily, weekly, monthly, yearly, handle_keyboard_buttons
+from handlers import start, dashboard, info, refresh, result, daily, weekly, monthly, yearly, chatid, handle_keyboard_buttons
 
 def main():
     # Bot-Token aus Umgebungsvariablen
@@ -20,6 +20,7 @@ def main():
     app.add_handler(CommandHandler("monthly", monthly))
     app.add_handler(CommandHandler("yearly", yearly))
     app.add_handler(CommandHandler("refresh", refresh))
+    app.add_handler(CommandHandler("chatid", chatid))  # Neuer Handler für /chatid
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_keyboard_buttons))
     
     # Starte den Webhook

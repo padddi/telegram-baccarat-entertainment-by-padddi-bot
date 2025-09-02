@@ -165,6 +165,12 @@ async def yearly(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message += f"Keine Daten verfügbar.\n\n{EMOJIS['refresh']} Versuche /refresh, falls Daten fehlen."
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
+async def chatid(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Gibt die Chat-ID des aktuellen Chats zurück."""
+    chat_id = update.message.chat.id
+    message = f"Deine Chat-ID ist: {chat_id}"
+    await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
+
 async def handle_keyboard_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     if text == "ℹ️ Info":
