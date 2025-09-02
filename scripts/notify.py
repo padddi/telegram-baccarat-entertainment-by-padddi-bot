@@ -5,6 +5,8 @@ from telegram import Bot
 from telegram.constants import ParseMode
 import asyncio
 import re
+from airtable import get_current_year_data  # Import der Funktion aus airtable.py
+from datetime import datetime
 
 # Konfiguration (aus Umgebungsvariablen laden – in GitHub Secrets speichern)
 AIRTABLE_TOKEN = os.getenv('AIRTABLE_TOKEN')  # Dein Airtable Token
@@ -13,24 +15,16 @@ AIRTABLE_NOTIFICATION_TBL = os.getenv('AIRTABLE_NOTIFICATION_TBL')  # Ersetze mi
 CHAT_ID_FIELD = 'ChatId'  # Festgelegter Feldname für Chat-IDs
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')  # Dein Telegram Bot Token
 
-# Markdown-Nachricht (vom User bereitgestellt – hier als Beispiel; kann als Argument übergeben werden)
-MESSAGE = """
-🚨 **Neue Benachrichtigung!**
-
-- **Titel**: Beispiel-Titel
-- **Details**: Hier kommt dein Markdown-Inhalt hin.
-- **Link**: [Klicke hier](https://example.com)
-
-Mehr Infos folgen.
-"""  # Wird automatisch escaped
+# Konstanten für die Nachricht
+EMOJI_ALERT = "🚨"
+EMOJI_RESULT = "📊"
+DASHBOARD_LINK = "https://baccarat-entertainment.com/office/affiliate"
 
 def escape_markdown_v2(text):
     """
     Escaped reservierte Zeichen für Telegram MarkdownV2.
     """
-    # Liste der zu escapenden Zeichen gemäß Telegram MarkdownV2
     reserved_chars = r'([_\*\[\]\(\)~`>#\+-=|{}.!])'
-    # Escape durch Hinzufügen von \ vor das Zeichen
     return re.sub(reserved_chars, r'\\\1', text)
 
 def get_chat_ids():
@@ -53,34 +47,66 @@ def get_chat_ids():
     
     return chat_ids
 
+async def get_latest_result(context):
+    """
+    Holt das neueste Ergebnis aus Airtable für das aktuelle Jahr (2025).
+    """
+    data = await get_current_year_data(context)
+    if not data:
+        raise ValueError("Keine Daten für das aktuelle Jahr gefunden.")
+    
+    # Sortiere nach Datum absteigend, um das neueste Ergebnis zu erhalten
+    latest_record = max(data, key=lambda x: datetime.strptime(x['Date'], "%Y-%m-%d"))
+    return latest_record['Date'], latest_record['Result']
+
 async def send_telegram_message(bot, chat_id, message):
     """
     Sendet eine Markdown-Nachricht an eine Chat-ID via python-telegram-bot SDK.
     """
     try:
-        # Nachricht für MarkdownV2 escapen
         escaped_message = escape_markdown_v2(message)
         await bot.send_message(
             chat_id=chat_id,
             text=escaped_message,
-            parse_mode=ParseMode.MARKDOWN_V2  # MarkdownV2 für Telegram
+            parse_mode=ParseMode.MARKDOWN_V2
         )
         print(f"Nachricht gesendet an {chat_id}")
     except Exception as e:
         print(f"Fehler beim Senden an {chat_id}: {e}")
 
 async def main():
-    # Optional: Nachricht als Kommandozeilen-Argument übernehmen (z.B. für dynamische Inhalte)
+    # Telegram Bot initialisieren
+    bot = Bot(token=TELEGRAM_TOKEN)
+    
+    # Kontext für airtable.py (bot_data für Caching)
+    context = type('Context', (), {'bot_data': {}})()
+    
+    # Neuestes Ergebnis holen
+    try:
+        date, result = await get_latest_result(context)
+    except ValueError as e:
+        print(f"Fehler beim Abrufen der Daten: {e}")
+        return
+    
+    # Ergebnis als Prozentsatz formatieren (angenommen, es ist eine Zahl)
+    try:
+        result = f"{float(result):.2f}%"  # Konvertiert zu Float und fügt % hinzu
+    except ValueError:
+        result = f"{result}%"  # Falls bereits ein String, nur % anhängen
+    
+    # Nachricht im gewünschten Format erstellen
+    MESSAGE = f"{EMOJI_ALERT} Neues Ergebnis verfügbar\n" \
+              f"Das heutige Ergebnis steht jetzt im Dashboard von Baccarat-Entertainment zur Verfügung\. Du kannst jetzt deinen Restake durchführen\.\n\n" \
+              f"[Dashboard]({DASHBOARD_LINK})\n\n" \
+              f"{date}: {EMOJI_RESULT} {result}"
+    
+    # Optional: Nachricht als Kommandozeilen-Argument übernehmen (überschreibt die generierte Nachricht)
     if len(sys.argv) > 1:
-        global MESSAGE
         MESSAGE = sys.argv[1]
     
     # Chat-IDs holen
     chat_ids = get_chat_ids()
     print(f"Gefundene Chat-IDs: {len(chat_ids)}")
-    
-    # Telegram Bot initialisieren
-    bot = Bot(token=TELEGRAM_TOKEN)
     
     # Für jede Chat-ID senden
     for chat_id in chat_ids:
