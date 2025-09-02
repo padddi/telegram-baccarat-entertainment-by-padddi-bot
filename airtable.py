@@ -93,8 +93,8 @@ async def add_chat_id_to_notifications(context, chat_id):
         "records": [
             {
                 "fields": {
-                    "ChatId": int(chat_id),  # Geändert: Integer statt String
-                    "Subscribed": datetime.now().strftime("%Y-%m-%d")
+                    "ChatId": int(chat_id),  # Integer, wie angefordert
+                    "Subscribed": datetime.now().astimezone().isoformat()  # Datum + Uhrzeit im ISO-Format
                 }
             }
         ]
@@ -103,13 +103,13 @@ async def add_chat_id_to_notifications(context, chat_id):
     # Daten für den aktualisierten Eintrag (PATCH)
     update_data = {
         "fields": {
-            "ChatId": int(chat_id),  # Geändert: Integer statt String
-            "Subscribed": datetime.now().strftime("%Y-%m-%d")
+            "ChatId": int(chat_id),  # Integer, wie angefordert
+            "Subscribed": datetime.now().astimezone().isoformat()  # Datum + Uhrzeit im ISO-Format
         }
     }
 
     url = f"https://api.airtable.com/v0/{base_id}/{table_id}"
-    params = {"filterByFormula": f"{{ChatId}} = {chat_id}"}  # Geändert: Keine Anführungszeichen für Integer
+    params = {"filterByFormula": f"{{ChatId}} = {chat_id}"}  # Integer-Filter
     try:
         # Suche nach vorhandenem Eintrag
         logger.debug(f"Sending GET request to {url} with params {params}")
@@ -159,7 +159,7 @@ async def remove_chat_id_from_notifications(context, chat_id):
         return False, "Fehler beim Abmelden der Benachrichtigung"
 
     url = f"https://api.airtable.com/v0/{base_id}/{table_id}"
-    params = {"filterByFormula": f"{{ChatId}} = {chat_id}"}  # Geändert: Keine Anführungszeichen für Integer
+    params = {"filterByFormula": f"{{ChatId}} = {chat_id}"}  # Integer-Filter
     try:
         logger.debug(f"Sending GET request to {url} with params {params}")
         response = requests.get(url, headers=headers, params=params)
