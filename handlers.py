@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from config import DASHBOARD_MESSAGE, KEYBOARD, EMOJIS, WEEKDAYS, DATE_FORMAT
 from utils import format_percent, get_week_date_range
-from airtable import get_current_year_data, get_all_data
+from airtable import get_current_year_data, get_all_data, add_chat_id_to_notifications, remove_chat_id_from_notifications
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(DASHBOARD_MESSAGE, reply_markup=KEYBOARD, parse_mode="Markdown")
@@ -169,6 +169,40 @@ async def chatid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Gibt die Chat-ID des aktuellen Chats zurück."""
     chat_id = update.message.chat.id
     message = f"Deine Chat-ID ist: {chat_id}"
+    await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
+
+async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Trägt die Chat-ID in die Benachrichtigungs-Tabelle ein."""
+    if update.message.chat.type != "private":
+        await update.message.reply_text(
+            "Dieser Befehl ist nur für private Chats verfügbar.",
+            reply_markup=KEYBOARD,
+            parse_mode="Markdown"
+        )
+        return
+    chat_id = update.message.chat.id
+    success, error = await add_chat_id_to_notifications(context, chat_id)
+    if success:
+        message = "✅ Du hast dich erfolgreich für Benachrichtigungen angemeldet!"
+    else:
+        message = f"❌ Fehler beim Anmelden für Benachrichtigungen: {error}\nBitte versuche es später erneut."
+    await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
+
+async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Entfernt die Chat-ID aus der Benachrichtigungs-Tabelle."""
+    if update.message.chat.type != "private":
+        await update.message.reply_text(
+            "Dieser Befehl ist nur für private Chats verfügbar.",
+            reply_markup=KEYBOARD,
+            parse_mode="Markdown"
+        )
+        return
+    chat_id = update.message.chat.id
+    success, error = await remove_chat_id_from_notifications(context, chat_id)
+    if success:
+        message = "✅ Du bist nicht mehr für Benachrichtigungen angemeldet."
+    else:
+        message = f"❌ Fehler beim Abmelden von Benachrichtigungen: {error}\nBitte versuche es später erneut."
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
 async def handle_keyboard_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):

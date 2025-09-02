@@ -65,3 +65,69 @@ async def get_all_data(context):
 async def get_current_year_data(context):
     """Holt Daten nur für das aktuelle Jahr (2025)."""
     return await fetch_airtable_data(context, "2025")
+
+async def add_chat_id_to_notifications(context, chat_id):
+    """Fügt eine Chat-ID zur Benachrichtigungs-Tabelle hinzu oder aktualisiert sie."""
+    headers = {"Authorization": f"Bearer {os.getenv('AIRTABLE_TOKEN')}", "Content-Type": "application/json"}
+    base_id = os.getenv("AIRTABLE_NOTIFICATION_BASE")
+    table_id = os.getenv("AIRTABLE_NOTIFICATION_TBL")
+    if not base_id or not table_id:
+        return False, "Fehler: Airtable-Konfiguration fehlt."
+
+    # Prüfe, ob die Chat-ID bereits existiert
+    url = f"https://api.airtable.com/v0/{base_id}/{table_id}"
+    params = {"filterByFormula": f"{{ChatId}} = '{chat_id}'"}
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        data = response.json()
+        existing_records = data.get("records", [])
+
+        # Daten für den neuen oder aktualisierten Eintrag
+        record_data = {
+            "fields": {
+                "ChatId": str(chat_id),
+                "Subscribed": datetime.now().strftime("%Y-%m-%d")
+            }
+        }
+
+        if existing_records:
+            # Aktualisiere bestehenden Eintrag
+            record_id = existing_records[0]["id"]
+            response = requests.patch(f"{url}/{record_id}", headers=headers, json=record_data)
+            response.raise_for_status()
+        else:
+            # Füge neuen Eintrag hinzu
+            response = requests.post(url, headers=headers, json={"records": [record_data]})
+            response.raise_for_status()
+        return True, None
+    except requests.RequestException as e:
+        print(f"Error adding chat_id to Airtable: {e}")
+        return False, f"Fehler beim Hinzufügen der Chat-ID. Bitte versuche es später erneut: {str(e)}"
+
+async def remove_chat_id_from_notifications(context, chat_id):
+    """Entfernt eine Chat-ID aus der Benachrichtigungs-Tabelle."""
+    headers = {"Authorization": f"Bearer {os.getenv('AIRTABLE_TOKEN')}"}
+    base_id = os.getenv("AIRTABLE_NOTIFICATION_BASE")
+    table_id = os.getenv("AIRTABLE_NOTIFICATION_TBL")
+    if not base_id or not table_id:
+        return False, "Fehler: Airtable-Konfiguration fehlt."
+
+    # Suche nach der Chat-ID
+    url = f"https://api.airtable.com/v0/{base_id}/{table_id}"
+    params = {"filterByFormula": f"{{ChatId}} = '{chat_id}'"}
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        data = response.json()
+        records = data.get("records", [])
+
+        if records:
+            # Lösche den Eintrag
+            record_id = records[0]["id"]
+            response = requests.delete(f"{url}/{record_id}", headers=headers)
+            response.raise_for_status()
+        return True, None
+    except requests.RequestException as e:
+        print(f"Error removing chat_id from Airtable: {e}")
+        return False, f"Fehler beim Entfernen der Chat-ID. Bitte versuche es später erneut: {str(e)}"
