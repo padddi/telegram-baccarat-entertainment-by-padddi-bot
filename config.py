@@ -11,7 +11,9 @@ EMOJIS = {
     "month": "🗓️",
     "year": "🗂️",
     "refresh": "🔄",
-    "notification": "📣"  # Neues Emoji für Benachrichtigungen
+    "notification": "📣",  # Für den Benachrichtigungs-Abschnitt
+    "subscribe": "🔔",     # Neu: Für /subscribe
+    "unsubscribe": "🚫"    # Neu: Für /unsubscribe
 }
 
 WEEKDAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"]
@@ -39,12 +41,12 @@ DASHBOARD_MESSAGE = (
     f"Befehl: /yearly\n\n"
     f"{EMOJIS['refresh']} *Refresh*: Aktualisiert den Cache für aktuelle Daten (nur in Ausnahmefällen verwenden, z. B. bei aktualisierten Daten)\n"
     f"Befehl: /refresh\n\n"
-    f"\n\n"
+    f"----\n"  # Abgrenzung statt zusätzlicher Leerzeile
     f"{EMOJIS['notification']} *Benachrichtigung*\n"
-    f"Möchtest du eine Benachrichtigung erhalten, sobald ein neues Ergebnis existiert?\n"
-    f"{EMOJIS['notification']} *Subscribe*: Trägt deine Chat-ID für Benachrichtigungen ein\n"
+    f"Möchtest du eine Benachrichtigung erhalten, sobald ein neues Ergebnis verfügbar ist?\n\n"
+    f"{EMOJIS['subscribe']} *Subscribe*: Aktiviert die Benachrichtigung\n"
     f"Befehl: /subscribe\n\n"
-    f"{EMOJIS['notification']} *Unsubscribe*: Entfernt deine Chat-ID aus den Benachrichtigungen\n"
+    f"{EMOJIS['unsubscribe']} *Unsubscribe*: Deaktiviert die Benachrichtigung\n"
     f"Befehl: /unsubscribe\n\n"
     f"Bitte wähle einen Befehl aus dem unteren Menü."
 )
