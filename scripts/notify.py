@@ -98,10 +98,10 @@ async def main():
         result = f"{result}%"  # Falls bereits ein String, nur % anhängen
     
     # Nachricht im gewünschten Format erstellen
-    MESSAGE = f"{EMOJI_ALERT} *Neues Ergebnis verfügbar*\n\n" \
+    MESSAGE = f"{EMOJI_ALERT} Neues Ergebnis verfügbar\n\n" \
               f"Das heutige Ergebnis steht jetzt im Dashboard von Baccarat-Entertainment zur Verfügung. Du kannst jetzt deinen Restake durchführen.\n\n" \
               f"{DASHBOARD_LINK}\n\n" \
-              f"{date}: {EMOJI_RESULT} *{result}*"
+              f"{date}: {EMOJI_RESULT} {result}"
     
     # Optional: Nachricht als Kommandozeilen-Argument übernehmen (überschreibt die generierte Nachricht)
     if len(sys.argv) > 1:
