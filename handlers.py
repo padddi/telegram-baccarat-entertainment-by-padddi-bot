@@ -217,4 +217,10 @@ async def handle_keyboard_buttons(update: Update, context: ContextTypes.DEFAULT_
         await weekly(update, context)
     elif text == f"{EMOJIS['month']} Ergebnisse (Monate)":
         await monthly(update, context)
-    elif text == f"{
+    elif text == f"{EMOJIS['year']} Ergebnisse (Jahre)":
+        await yearly(update, context)
+    else:
+        await update.message.reply_text(
+            "Bitte wähle einen Befehl aus dem unteren Menü.",
+            reply_markup=KEYBOARD
+        )
