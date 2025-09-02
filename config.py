@@ -5,12 +5,12 @@ DATE_FORMAT = "%d.%m.%Y"  # Beispiel: 02.09.2025
 PERCENT_FORMAT = ".2f"    # Für 12,34%
 
 EMOJIS = {
-    "result": "📊",
-    "month": "📅",
-    "year": "📆",
-    "sum": "∑",
-    "refresh": "🔄",
-    "week": "📆"
+    "result": "✅",
+    "week": "📈",
+    "sum": "📊",
+    "month": "🗓️",
+    "year": "🗂️",
+    "refresh": "🔄"
 }
 
 WEEKDAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"]
