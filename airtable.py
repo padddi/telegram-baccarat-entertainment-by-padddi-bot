@@ -72,38 +72,56 @@ async def add_chat_id_to_notifications(context, chat_id):
     base_id = os.getenv("AIRTABLE_NOTIFICATION_BASE")
     table_id = os.getenv("AIRTABLE_NOTIFICATION_TBL")
     if not base_id or not table_id:
-        return False, "Fehler: Airtable-Konfiguration fehlt."
+        print("Error: AIRTABLE_NOTIFICATION_BASE or AIRTABLE_NOTIFICATION_TBL not set")
+        return False, "Fehler beim Anmelden der Benachrichtigung"
+
+    # Daten für den neuen Eintrag
+    record_data = {
+        "records": [
+            {
+                "fields": {
+                    "ChatId": str(chat_id),
+                    "Subscribed": datetime.now().strftime("%Y-%m-%d")
+                }
+            }
+        ]
+    }
+
+    # Daten für den aktualisierten Eintrag (PATCH)
+    update_data = {
+        "fields": {
+            "ChatId": str(chat_id),
+            "Subscribed": datetime.now().strftime("%Y-%m-%d")
+        }
+    }
 
     # Prüfe, ob die Chat-ID bereits existiert
     url = f"https://api.airtable.com/v0/{base_id}/{table_id}"
     params = {"filterByFormula": f"{{ChatId}} = '{chat_id}'"}
     try:
+        # Suche nach vorhandenem Eintrag
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
         data = response.json()
         existing_records = data.get("records", [])
 
-        # Daten für den neuen oder aktualisierten Eintrag
-        record_data = {
-            "fields": {
-                "ChatId": str(chat_id),
-                "Subscribed": datetime.now().strftime("%Y-%m-%d")
-            }
-        }
-
         if existing_records:
             # Aktualisiere bestehenden Eintrag
             record_id = existing_records[0]["id"]
-            response = requests.patch(f"{url}/{record_id}", headers=headers, json=record_data)
+            response = requests.patch(f"{url}/{record_id}", headers=headers, json=update_data)
             response.raise_for_status()
         else:
             # Füge neuen Eintrag hinzu
-            response = requests.post(url, headers=headers, json={"records": [record_data]})
+            response = requests.post(url, headers=headers, json=record_data)
             response.raise_for_status()
         return True, None
     except requests.RequestException as e:
-        print(f"Error adding chat_id to Airtable: {e}")
-        return False, f"Fehler beim Hinzufügen der Chat-ID. Bitte versuche es später erneut: {str(e)}"
+        # Logge den genauen Fehler für Debugging
+        error_message = f"Error adding chat_id to Airtable: {e}"
+        if hasattr(e, 'response') and e.response is not None:
+            error_message += f" - Response: {e.response.text}"
+        print(error_message)
+        return False, "Fehler beim Anmelden der Benachrichtigung"
 
 async def remove_chat_id_from_notifications(context, chat_id):
     """Entfernt eine Chat-ID aus der Benachrichtigungs-Tabelle."""
@@ -111,7 +129,8 @@ async def remove_chat_id_from_notifications(context, chat_id):
     base_id = os.getenv("AIRTABLE_NOTIFICATION_BASE")
     table_id = os.getenv("AIRTABLE_NOTIFICATION_TBL")
     if not base_id or not table_id:
-        return False, "Fehler: Airtable-Konfiguration fehlt."
+        print("Error: AIRTABLE_NOTIFICATION_BASE or AIRTABLE_NOTIFICATION_TBL not set")
+        return False, "Fehler beim Abmelden der Benachrichtigung"
 
     # Suche nach der Chat-ID
     url = f"https://api.airtable.com/v0/{base_id}/{table_id}"
@@ -129,5 +148,9 @@ async def remove_chat_id_from_notifications(context, chat_id):
             response.raise_for_status()
         return True, None
     except requests.RequestException as e:
-        print(f"Error removing chat_id from Airtable: {e}")
-        return False, f"Fehler beim Entfernen der Chat-ID. Bitte versuche es später erneut: {str(e)}"
+        # Logge den genauen Fehler für Debugging
+        error_message = f"Error removing chat_id from Airtable: {e}"
+        if hasattr(e, 'response') and e.response is not None:
+            error_message += f" - Response: {e.response.text}"
+        print(error_message)
+        return False, "Fehler beim Abmelden der Benachrichtigung"

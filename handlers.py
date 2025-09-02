@@ -185,7 +185,7 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if success:
         message = "✅ Du hast dich erfolgreich für Benachrichtigungen angemeldet!"
     else:
-        message = f"❌ Fehler beim Anmelden für Benachrichtigungen: {error}\nBitte versuche es später erneut."
+        message = "❌ Fehler beim Anmelden der Benachrichtigung"
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
 async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -202,7 +202,7 @@ async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if success:
         message = "✅ Du bist nicht mehr für Benachrichtigungen angemeldet."
     else:
-        message = f"❌ Fehler beim Abmelden von Benachrichtigungen: {error}\nBitte versuche es später erneut."
+        message = "❌ Fehler beim Abmelden der Benachrichtigung"
     await update.message.reply_text(message, reply_markup=KEYBOARD, parse_mode="Markdown")
 
 async def handle_keyboard_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -217,10 +217,4 @@ async def handle_keyboard_buttons(update: Update, context: ContextTypes.DEFAULT_
         await weekly(update, context)
     elif text == f"{EMOJIS['month']} Ergebnisse (Monate)":
         await monthly(update, context)
-    elif text == f"{EMOJIS['year']} Ergebnisse (Jahre)":
-        await yearly(update, context)
-    else:
-        await update.message.reply_text(
-            "Bitte wähle einen Befehl aus dem unteren Menü.",
-            reply_markup=KEYBOARD
-        )
+    elif text == f"{
