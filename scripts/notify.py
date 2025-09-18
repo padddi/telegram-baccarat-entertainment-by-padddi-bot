@@ -90,18 +90,29 @@ async def main():
     except ValueError as e:
         print(f"Fehler beim Abrufen der Daten: {e}")
         return
-    
+
     # Ergebnis als Prozentsatz formatieren (angenommen, es ist eine Zahl)
     try:
-        result = f"{float(result):.2f}%"  # Konvertiert zu Float und fügt % hinzu
+        result_value = float(result)  # Konvertiere Result zu Float für die Prüfung
+        result_formatted = f"{result_value:.2f}%"  # Formatierte Darstellung
     except ValueError:
-        result = f"{result}%"  # Falls bereits ein String, nur % anhängen
+        result_value = result  # Falls kein Float, Originalwert behalten
+        result_formatted = f"{result}%"  # Falls bereits ein String, nur % anhängen
     
-    # Nachricht im gewünschten Format erstellen
-    MESSAGE = f"{EMOJI_ALERT} Neues Ergebnis verfügbar\n\n" \
-              f"Das heutige Ergebnis steht jetzt im Dashboard von Baccarat-Entertainment zur Verfügung. Du kannst jetzt deinen Restake durchführen.\n\n" \
-              f"{DASHBOARD_LINK}\n\n" \
-              f"{date}: {EMOJI_RESULT} {result}"
+    # Prüfe, ob Result gleich 0 ist
+    isNullRound = result_value == 0
+    
+    # Nachricht basierend auf isNullRound erstellen
+    if isNullRound:
+        MESSAGE = f"{EMOJI_ALERT}{EMOJI_ALERT}{EMOJI_ALERT} Nullrunde {EMOJI_ALERT}{EMOJI_ALERT}{EMOJI_ALERT}\n\n" \
+                  f"Leider gab es diesmal kein Ergebnis. \n\n" \
+                  f"Details im Dashboard: {DASHBOARD_LINK}\n\n" \
+                  f"{date}: {EMOJI_RESULT} {result_formatted}"
+    else:
+        MESSAGE = f"{EMOJI_ALERT}{EMOJI_ALERT}{EMOJI_ALERT} Neues Ergebnis {EMOJI_ALERT}{EMOJI_ALERT}{EMOJI_ALERT}\n\n" \
+                  f"Das aktuelle Ergebnis steht jetzt im Dashboard von Baccarat Entertainment zur Verfügung. \n\n" \
+                  f"{DASHBOARD_LINK}\n\n" \
+                  f"{date}: {EMOJI_RESULT} {result_formatted}"
     
     # Optional: Nachricht als Kommandozeilen-Argument übernehmen (überschreibt die generierte Nachricht)
     if len(sys.argv) > 1:
