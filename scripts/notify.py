@@ -21,7 +21,7 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')  # Dein Telegram Bot Token
 # Konstanten für die Nachricht
 EMOJI_ALERT = "🚨"
 EMOJI_RESULT = "📊"
-DASHBOARD_LINK = "https://app.baccarat-entertainment.info"
+DASHBOARD_LINK = "https://beclub22.com"
 
 def escape_markdown_v2(text):
     """
