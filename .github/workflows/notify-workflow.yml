@@ -35,6 +35,8 @@ jobs:
           AIRTABLE_NOTIFICATION_TBL: ${{ secrets.AIRTABLE_NOTIFICATION_TBL }}
           AIRTABLE_BASE_2025: ${{ secrets.AIRTABLE_BASE_2025 }}
           AIRTABLE_TBL_2025: ${{ secrets.AIRTABLE_TBL_2025 }}
+          AIRTABLE_BASE_2026: ${{ secrets.AIRTABLE_BASE_2026 }}
+          AIRTABLE_TBL_2026: ${{ secrets.AIRTABLE_TBL_2026 }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: |
           python scripts/notify.py
