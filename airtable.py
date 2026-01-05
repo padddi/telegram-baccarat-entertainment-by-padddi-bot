@@ -68,15 +68,18 @@ async def fetch_airtable_data(context, year):
 async def get_all_data(context):
     """Kombiniert Daten aus allen Jahren."""
     data = []
-    for year in ["2023", "2024", "2025"]:
+    for year in ["2023", "2024", "2025", "2026"]:
         data.extend(await fetch_airtable_data(context, year))
     logger.info(f"Combined {len(data)} records from all years")
     return data
 
 async def get_current_year_data(context):
-    """Holt Daten nur für das aktuelle Jahr (2025)."""
-    data = await fetch_airtable_data(context, "2025")
-    logger.info(f"Fetched {len(data)} records for current year 2025")
+    """Holt Daten nur für das aktuelle Jahr (basierend auf dem heutigen Datum)."""
+    current_year = datetime.now().year  # Automatische Ermittlung des aktuellen Jahres
+    year_str = str(current_year)
+    
+    data = await fetch_airtable_data(context, year_str)
+    logger.info(f"Fetched {len(data)} records for current year {current_year}")
     return data
 
 async def add_chat_id_to_notifications(context, chat_id):
